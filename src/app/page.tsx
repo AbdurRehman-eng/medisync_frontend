@@ -6,11 +6,6 @@ export default function Home() {
           Hello World.
         </div>
       </main>
-      <footer className="">
-        <div>
-          Chal O.
-        </div>
-      </footer>
     </div>
   );
 }

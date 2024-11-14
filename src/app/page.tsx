@@ -1,8 +1,12 @@
+import HomeScreen from "./pages/home";
+import Signup from "./pages/signup";
+
 export default function Home() {
   return (
     <div>
       <main className="">
-        Hello World
+        {/* <HomeScreen /> */}
+        <Signup />
       </main>
     </div>
   );

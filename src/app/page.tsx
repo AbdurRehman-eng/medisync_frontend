@@ -1,5 +1,7 @@
+"use client";
+
 import HomeScreen from "./pages/home";
-import Login from "./pages/login";
+import Login from "./pages/Login";
 import Signup from "./pages/signup";
 
 export default function Home() {

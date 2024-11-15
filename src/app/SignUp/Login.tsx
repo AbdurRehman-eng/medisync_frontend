@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 

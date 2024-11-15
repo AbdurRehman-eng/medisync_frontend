@@ -1,4 +1,5 @@
 import HomeScreen from "./pages/home";
+import Login from "./pages/login";
 import Signup from "./pages/signup";
 
 export default function Home() {
@@ -6,7 +7,8 @@ export default function Home() {
     <div>
       <main className="">
         {/* <HomeScreen /> */}
-        <Signup />
+        {/* <Signup /> */}
+        <Login />
       </main>
     </div>
   );

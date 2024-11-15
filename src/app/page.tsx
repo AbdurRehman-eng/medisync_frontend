@@ -6,9 +6,9 @@ export default function Home() {
   return (
     <div>
       <main className="">
-        {/* <HomeScreen /> */}
+        <HomeScreen />
         {/* <Signup /> */}
-        <Login />
+        {/* <Login /> */}
       </main>
     </div>
   );

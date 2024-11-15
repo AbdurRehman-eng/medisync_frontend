@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 
@@ -63,6 +63,8 @@ const LoginSignup = () => {
     setShowSuggestions(false);
     setErrors((prev) => ({ ...prev, email: "" }));
   };
+
+  const router = useRouter();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
@@ -168,9 +170,10 @@ const LoginSignup = () => {
             {"Already have an account?"}{" "}
             <button
               type="button"
+              onClick={()=>{router.push("/pages/signup")}}
               className="text-[#173b2b] font-semibold hover:underline focus:outline-none"
             >
-              "Login"
+              {"SignUp"}
             </button>
           </p>
         </form>

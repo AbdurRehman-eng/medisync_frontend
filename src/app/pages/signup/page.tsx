@@ -1,9 +1,9 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 
-const LoginSignup = () => {
+const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -64,11 +64,13 @@ const LoginSignup = () => {
     setErrors((prev) => ({ ...prev, email: "" }));
   };
 
+  const router = useRouter();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
         <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">
-          {"Login"}
+          {"SignUp"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -160,17 +162,18 @@ const LoginSignup = () => {
             {loading ? (
               <FaSpinner className="animate-spin mx-auto" size={24} />
             ) :
-              "Login"
+              "SignUp"
             }
           </button>
 
           <p className="text-center text-sm text-gray-600">
-            {"Already have an account?"}{" "}
+            {"Don't have an account?"}{" "}
             <button
               type="button"
+              onClick={()=>{router.push("/pages/login")}}
               className="text-[#173b2b] font-semibold hover:underline focus:outline-none"
             >
-              "Login"
+              {"Login"}
             </button>
           </p>
         </form>
@@ -179,4 +182,4 @@ const LoginSignup = () => {
   );
 };
 
-export default LoginSignup;
+export default SignUp;

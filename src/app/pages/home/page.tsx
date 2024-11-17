@@ -1,5 +1,4 @@
 import Nav from "../../components/navbar";
-import { useRouter } from "next/router";
 
 function HomeScreen() {                                                                              
     return ( 

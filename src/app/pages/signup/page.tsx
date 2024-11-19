@@ -2,76 +2,80 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/app/firebase/firebase";
 
-const SignUp = () => {
+const SignUp: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({ email: "", password: "" });
-
-  const commonDomains = ["@gmail.com", "@yahoo.com", "@outlook.com", "@hotmail.com"];
+  const [errors, setErrors] = useState({ email: "", password: "", general: "" });
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const router = useRouter();
+  const commonDomains = ["@gmail.com", "@yahoo.com", "@outlook.com", "@hotmail.com"];
+
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
     setShowSuggestions(!value.includes("@") && value.length > 0);
 
-    if (!value) {
-      setErrors((prev) => ({ ...prev, email: "Email is required" }));
-    } else if (!validateEmail(value)) {
-      setErrors((prev) => ({ ...prev, email: "Invalid email format" }));
-    } else {
-      setErrors((prev) => ({ ...prev, email: "" }));
-    }
+    setErrors((prev) => ({
+      ...prev,
+      email: value
+        ? validateEmail(value)
+          ? ""
+          : "Invalid email format"
+        : "Email is required",
+    }));
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
 
-    if (!value) {
-      setErrors((prev) => ({ ...prev, password: "Password is required" }));
-    } else if (value.length < 8) {
-      setErrors((prev) => (
-        { ...prev, password: "Password must be at least 8 characters" }
-      ));
-    } else {
-      setErrors((prev) => ({ ...prev, password: "" }));
-    }
+    setErrors((prev) => ({
+      ...prev,
+      password: value
+        ? value.length >= 8
+          ? ""
+          : "Password must be at least 8 characters"
+        : "Password is required",
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!errors.email && !errors.password && email && password) {
-      setLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setLoading(false);
-      console.log("Form submitted:", { email, password });
-    }
-  };
-
-  const applySuggestion = (domain : string) => {
+  const applySuggestion = (domain: string) => {
     setEmail(email.split("@")[0] + domain);
     setShowSuggestions(false);
     setErrors((prev) => ({ ...prev, email: "" }));
   };
 
-  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (errors.email || errors.password || !email || !password) return;
+
+    setLoading(true);
+    setErrors((prev) => ({ ...prev, general: "" }));
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("User signed up:", userCredential.user);
+      router.push("/pages/dashboard"); 
+    } catch (error: any) {
+      console.error("Error signing up:", error);
+      setErrors((prev) => ({ ...prev, general: error.message || "Failed to sign up" }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
-        <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">
-          {"SignUp"}
-        </h2>
+        <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">Sign Up</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative">
@@ -92,11 +96,7 @@ const SignUp = () => {
               aria-describedby="email-error"
             />
             {errors.email && (
-              <p
-                id="email-error"
-                className="mt-1 text-sm text-red-500"
-                role="alert"
-              >
+              <p id="email-error" className="mt-1 text-sm text-red-500" role="alert">
                 {errors.email}
               </p>
             )}
@@ -144,36 +144,32 @@ const SignUp = () => {
               </button>
             </div>
             {errors.password && (
-              <p
-                id="password-error"
-                className="mt-1 text-sm text-red-500"
-                role="alert"
-              >
+              <p id="password-error" className="mt-1 text-sm text-red-500" role="alert">
                 {errors.password}
               </p>
             )}
           </div>
+
+          {errors.general && (
+            <p className="text-sm text-red-500 text-center">{errors.general}</p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-[#173b2b] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5c46] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#173b2b] transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? (
-              <FaSpinner className="animate-spin mx-auto" size={24} />
-            ) :
-              "SignUp"
-            }
+            {loading ? <FaSpinner className="animate-spin mx-auto" size={24} /> : "Sign Up"}
           </button>
 
           <p className="text-center text-sm text-gray-600">
-            {"Don't have an account?"}{" "}
+            Already have an account?{" "}
             <button
               type="button"
-              onClick={()=>{router.push("/pages/login")}}
+              onClick={() => router.push("/pages/login")}
               className="text-[#173b2b] font-semibold hover:underline focus:outline-none"
             >
-              {"Login"}
+              Login
             </button>
           </p>
         </form>

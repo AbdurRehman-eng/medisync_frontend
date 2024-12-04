@@ -2,6 +2,8 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/app/firebase/firebase";
 
 const LoginSignup = () => {
   const [email, setEmail] = useState("");
@@ -51,12 +53,24 @@ const LoginSignup = () => {
     e.preventDefault();
     if (!errors.email && !errors.password && email && password) {
       setLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setLoading(false);
-      console.log("Form submitted:", { email, password });
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        router.push("/pages/dashboard");
+      } catch (error: any) {
+        setLoading(false);
+        console.error("Authentication Error:", error.message);
+        setErrors((prev) => ({
+          ...prev,
+          email: error.code === "auth/user-not-found" ? "User not found" : "",
+          password: error.code === "auth/wrong-password" ? "Incorrect password" : "",
+        }));
+      } finally {
+        setLoading(false);
+      }
     }
   };
+  
 
   const applySuggestion = (domain : string) => {
     setEmail(email.split("@")[0] + domain);

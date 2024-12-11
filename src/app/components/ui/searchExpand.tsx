@@ -38,50 +38,47 @@ const SearchExtend = () => {
 
   return (
     <div className="flex justify-end p-4 relative">
-      <div
-        className={`flex items-center transition-all duration-300 ease-in-out ${
-          isExpanded ? "w-full md:w-96" : "w-10"
-        }`}
+  <div
+    className={`relative flex items-center transition-all duration-300 ease-in-out ${
+      isExpanded ? "w-full md:w-96" : "w-10"
+    }`}
+  >
+    <form
+      onSubmit={handleSearch}
+      className={`absolute right-0 flex items-center transition-all duration-300 ease-in-out ${
+        isExpanded ? "w-full md:w-96" : "w-10"
+      }`}
+    >
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={handleInputChange}
+        placeholder="Search here..."
+        aria-label="Search input field"
+        className={`w-full py-2 px-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:border-transparent shadow-sm transition-all duration-300 ${
+          isExpanded ? "opacity-100" : "opacity-0 w-0 p-0"
+        } ${error ? "border-red-500 focus:ring-red-400" : ""}`}
+      />
+      <button
+        type="button"
+        onClick={handleSearchClick}
+        aria-label="Toggle search bar"
+        className={`absolute right-2 p-2 rounded-full hover:bg-gray-100 focus:outline-none transition-all duration-300 ease-in-out`}
       >
-        <form
-          onSubmit={handleSearch}
-          className="flex items-center w-full relative"
-        >
-          <input
-            id="searchInput"
-            type="text"
-            value={searchQuery}
-            onChange={handleInputChange}
-            placeholder="Search here..."
-            aria-label="Search input field"
-            className={`w-full py-2 px-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm transition-all duration-300 ${
-              isExpanded ? "opacity-100" : "opacity-0 w-0 p-0"
-            } ${error ? "border-red-500 focus:ring-red-400" : ""}`}
-          />
-          <button
-            type="button"
-            onClick={handleSearchClick}
-            aria-label="Toggle search bar"
-            className={`absolute ${
-              isExpanded ? "right-2" : "right-0"
-            } p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 ease-in-out`}
-          >
-            <FiSearch
-              className="w-6 h-6 text-gray-600 hover:text-gray-800"
-              aria-hidden="true"
-            />
-          </button>
-        </form>
-      </div>
-      {error && (
-        <div
-          className="absolute top-16 right-4 bg-red-50 text-red-500 px-4 py-2 rounded-md shadow-sm"
-          role="alert"
-        >
-          {error}
-        </div>
-      )}
+        <FiSearch
+          className="w-6 h-6 text-lightBg hover:text-black"
+          aria-hidden="true"
+        />
+      </button>
+    </form>
+  </div>
+  {error && (
+    <div className="mt-2 text-sm text-red-500" role="alert">
+      {error}
     </div>
+  )}
+</div>
+
   );
 };
 

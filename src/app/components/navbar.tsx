@@ -1,5 +1,6 @@
 "use client";
 import Image from 'next/image';
+import { MouseEventHandler } from "react";
 import { useRouter } from "next/navigation";
 import Button from "./ui/button";
 import SearchExtend from "./ui/searchExpand";

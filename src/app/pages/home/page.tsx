@@ -4,6 +4,7 @@ import HeroTextArea from "../../components/MainHeroText"
 import MedicineCard from "@/app/components/ui/card";
 import MedicineList from "@/app/components/ui/list";
 
+
 function HomeScreen() {                                                                              
     return ( 
         <div className="h-[100vh] w-[100vw] bg-[#fefdf8]">

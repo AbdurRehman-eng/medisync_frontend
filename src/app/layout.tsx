@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: {
     template: "MediSync: %s",
-    default: "A medical app that provides alternatives to prescribed medicines.",
+    default: "MediSync",
   },
   description: "A medical app that provides alternatives to prescribed medicines by converting formulas to similar options, along with doctor appointment scheduling and seamless integration for enhanced healthcare accessibility.",
   keywords: "medical, medisync, doctor, medicine, medicine alternatives",

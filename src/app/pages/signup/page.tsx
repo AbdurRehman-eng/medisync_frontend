@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { FaEye, FaEyeSlash, FaSpinner, FaGoogle } from "react-icons/fa";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/firebase";
 
 const SignUp: React.FC = () => {
@@ -53,27 +53,10 @@ const SignUp: React.FC = () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       alert("Sign-up successful.");
-      router.push("/dashboard");
+      router.push("/pages/dashboard");
     } catch (error: any) {
       const errorMessage = firebaseErrorMessages(error.code);
       setErrors((prev) => ({ ...prev, general: errorMessage }));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignUpWithGoogle = async () => {
-    setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      alert("Sign-up successful with Google.");
-      router.push("/dashboard");
-    } catch (error: any) {
-      setErrors((prev) => ({
-        ...prev,
-        general: "Failed to sign up with Google. Please try again.",
-      }));
     } finally {
       setLoading(false);
     }
@@ -142,18 +125,6 @@ const SignUp: React.FC = () => {
             {loading ? <FaSpinner className="animate-spin" /> : "Sign Up"}
           </button>
         </form>
-
-        {/* Sign Up with Google */}
-        <div className="mt-6">
-          <button
-            onClick={handleSignUpWithGoogle}
-            className="w-full py-3 rounded-lg flex items-center justify-center bg-[#db4437] text-white hover:bg-[#b33c2d]"
-            disabled={loading}
-          >
-            <FaGoogle className="mr-2" />
-            Sign Up with Google
-          </button>
-        </div>
       </div>
     </div>
   );

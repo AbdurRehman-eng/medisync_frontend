@@ -25,7 +25,7 @@ function Main() {
     signOut(auth)
       .then(() => {
         setUser(null);
-        router.push("/login"); // Redirect to login on sign out
+        router.push("/pages/login"); // Redirect to login on sign out
       })
       .catch((error) => {
         console.error("Sign-out error:", error);

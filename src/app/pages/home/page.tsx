@@ -1,3 +1,4 @@
+"use client";
 import Nav from "../../components/navbar";
 import { useRouter } from "next/router";
 import HeroTextArea from "../../components/MainHeroText"
@@ -7,7 +8,7 @@ import MedicineList from "@/app/components/ui/list";
 
 function HomeScreen() {                                                                              
     return ( 
-        <div className="h-[100vh] w-[100vw] bg-[#fefdf8]">
+        <div className="h-[100vh] w-[100vw] bg-[#fefdf8] overflow-x-hidden">
             <Nav />
             <div className="bg-transparent h-20 w-[100w]"></div>
             <HeroTextArea/>

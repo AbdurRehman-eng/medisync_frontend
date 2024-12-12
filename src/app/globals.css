@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.horizontalList::-webkit-scrollbar {
+    width: 0px;
+}
+
+.horizontalList {
+    -ms-overflow-style: none; /* For Internet Explorer */
+    scrollbar-width: none; /* For Firefox */
+}

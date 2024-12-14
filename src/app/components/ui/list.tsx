@@ -1,13 +1,29 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import MedicineCard from "./card";
 
 interface MedicineListProps {
-  title: string; // Declare the `title` prop as a string
+  title: string;
 }
 
 const MedicineList: React.FC<MedicineListProps> = ({ title }) => {
+  const [medicines, setMedicines] = useState<any[]>([]); // State for medicines
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Fetch medicines from the backend
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/medicines");
+        const data = await response.json();
+        setMedicines(data);
+      } catch (error) {
+        console.error("Error fetching medicines:", error);
+      }
+    };
+
+    fetchMedicines();
+  }, []);
 
   useEffect(() => {
     const handleKeyNavigation = (e: KeyboardEvent) => {
@@ -33,63 +49,6 @@ const MedicineList: React.FC<MedicineListProps> = ({ title }) => {
       });
     }
   };
-
-  const medicines = [
-    {
-      id: 1,
-      name: "Pain Relief Plus",
-      price: "$19.99",
-      image: "images.unsplash.com/photo-1584308666744-24d5c474f2ae",
-      description: "Fast-acting pain relief formula",
-      type: "Pills",
-      packSize: "30 tablets",
-    },
-    {
-      id: 2,
-      name: "Daily Vitamins",
-      price: "$24.99",
-      image: "images.unsplash.com/photo-1550572017-edd951b55104",
-      description: "Complete daily nutrition",
-      type: "Capsules",
-      packSize: "60 capsules"
-    },
-    {
-      id: 3,
-      name: "Omega-3 Fish Oil",
-      price: "$29.99",
-      image: "images.unsplash.com/photo-1550572017-37c5b36b2c6f",
-      description: "Heart health supplement",
-      type: "Softgels",
-      packSize: "90 softgels"
-    },
-    {
-      id: 4,
-      name: "Allergy Relief",
-      price: "$15.99",
-      image: "images.unsplash.com/photo-1584308666744-24d5c474f2ae",
-      description: "24-hour allergy control",
-      type: "Syrup",
-      packSize: "120ml bottle"
-    },
-    {
-      id: 5,
-      name: "Probiotics",
-      price: "$34.99",
-      image: "images.unsplash.com/photo-1550572017-37c5b36b2c6f",
-      description: "Digestive health support",
-      type: "Capsules",
-      packSize: "45 capsules"
-    },
-    {
-      id: 6,
-      name: "Sleep Aid",
-      price: "$21.99",
-      image: "images.unsplash.com/photo-1584308666744-24d5c474f2ae",
-      description: "Natural sleep support",
-      type: "Cream",
-      packSize: "50g tube"
-    }
-  ];
 
   return (
     <div className="py-8 horizontalList overflow-hidden pl-10">

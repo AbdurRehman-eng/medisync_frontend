@@ -1,9 +1,8 @@
-"use client";
-
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 
 const LoginSignup = () => {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -68,7 +67,7 @@ const LoginSignup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
         <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">
-          {"Login"}
+          {isLogin ? "Login" : "Sign Up"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -159,18 +158,21 @@ const LoginSignup = () => {
           >
             {loading ? (
               <FaSpinner className="animate-spin mx-auto" size={24} />
-            ) :
+            ) : isLogin ? (
               "Login"
-            }
+            ) : (
+              "Sign Up"
+            )}
           </button>
 
           <p className="text-center text-sm text-gray-600">
-            {"Already have an account?"}{" "}
+            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               type="button"
+              onClick={() => setIsLogin(!isLogin)}
               className="text-[#173b2b] font-semibold hover:underline focus:outline-none"
             >
-              "Login"
+              {isLogin ? "Sign Up" : "Login"}
             </button>
           </p>
         </form>

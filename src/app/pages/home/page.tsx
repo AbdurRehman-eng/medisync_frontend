@@ -5,6 +5,7 @@ import HeroTextArea from "../../components/MainHeroText"
 // import MedicineList from "@/app/components/ui/list";
 import Footer from "@/app/components/footer"
 
+
 function HomeScreen() {                                                                              
     return ( 
         <>

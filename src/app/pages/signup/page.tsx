@@ -1,116 +1,162 @@
 "use client";
-import { useRouter } from "next/navigation";
-import React, { useState, useEffect, useRef } from "react";
-import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+declare global {
+  interface Window {
+    recaptchaVerifier: any;  // You can replace 'any' with the actual type if needed
+    confirmationResult: any; // You can replace 'any' with the actual type if needed
+  }
+}
 
-const SignUp = () => {
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaSpinner,
+} from "react-icons/fa";
+import {
+  createUserWithEmailAndPassword,
+  sendSignInLinkToEmail,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+} from "firebase/auth";
+import { auth } from "@/app/firebase/firebase";
+
+const SignUp: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+1");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [smsCode, setSmsCode] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    phone: "",
+    general: "",
+    sms: "",
+  });
+  const router = useRouter();
 
-  const commonDomains = ["@gmail.com", "@yahoo.com", "@outlook.com", "@hotmail.com"];
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const countryCodes = [
+    { code: "+1", country: "United States/Canada" },
+    { code: "+44", country: "United Kingdom" },
+    { code: "+91", country: "India" },
+    { code: "+61", country: "Australia" },
+    // Add more countries as needed
+  ];
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePhone = (phone: string) => /^\d{7,15}$/.test(phone);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
-    setShowSuggestions(!value.includes("@") && value.length > 0);
+    setEmail(e.target.value);
+    setErrors((prev) => ({
+      ...prev,
+      email: validateEmail(e.target.value) ? "" : "Invalid email format",
+    }));
+  };
 
-    if (!value) {
-      setErrors((prev) => ({ ...prev, email: "Email is required" }));
-    } else if (!validateEmail(value)) {
-      setErrors((prev) => ({ ...prev, email: "Invalid email format" }));
-    } else {
-      setErrors((prev) => ({ ...prev, email: "" }));
-    }
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(e.target.value);
+    setErrors((prev) => ({
+      ...prev,
+      phone: validatePhone(e.target.value) ? "" : "Invalid phone number format",
+    }));
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPassword(value);
+    setPassword(e.target.value);
+    setErrors((prev) => ({
+      ...prev,
+      password: e.target.value.length >= 8 ? "" : "Password must be at least 8 characters",
+    }));
+  };
 
-    if (!value) {
-      setErrors((prev) => ({ ...prev, password: "Password is required" }));
-    } else if (value.length < 8) {
-      setErrors((prev) => (
-        { ...prev, password: "Password must be at least 8 characters" }
-      ));
-    } else {
-      setErrors((prev) => ({ ...prev, password: "" }));
+  const initializeRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      // Make sure the container element exists, otherwise it will throw an error
+      const recaptchaContainer = document.getElementById("recaptcha-container");
+      
+      if (recaptchaContainer) {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          "recaptcha-container:" // This is the HTML element that will hold the reCAPTCHA
+          {
+            size: "invisible", // You can make it visible if needed
+            callback: () => {
+              console.log("reCAPTCHA solved");
+            },
+          },
+          auth // Pass the 'auth' instance here, not a string
+        );
+      } else {
+        console.error("reCAPTCHA container element not found");
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!errors.email && !errors.password && email && password) {
-      setLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (errors.email || errors.password || errors.phone || !email || !password || !phone) return;
+
+    setLoading(true);
+    try {
+      // Email/Password Registration
+      await createUserWithEmailAndPassword(auth, email, password);
+
+      // Send Verification Email
+      const actionCodeSettings = {
+        url: "http://localhost:3000/pages/dashboard",
+        handleCodeInApp: true,
+      };
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      window.localStorage.setItem("emailForSignIn", email);
+
+      // Phone Number Verification
+      initializeRecaptcha();
+      const appVerifier = window.recaptchaVerifier;
+
+      const fullPhoneNumber = countryCode + phone;
+      const confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
+      window.confirmationResult = confirmationResult;
+
+      alert("SMS sent. Please enter the code to verify.");
+    } catch (error: any) {
+      console.error(error);
+      setErrors((prev) => ({ ...prev, general: error.message || "Failed to sign up" }));
+    } finally {
       setLoading(false);
-      console.log("Form submitted:", { email, password });
     }
   };
 
-  const applySuggestion = (domain : string) => {
-    setEmail(email.split("@")[0] + domain);
-    setShowSuggestions(false);
-    setErrors((prev) => ({ ...prev, email: "" }));
+  const handleCodeVerification = async () => {
+    if (!smsCode) {
+      setErrors((prev) => ({ ...prev, sms: "Please enter the SMS code" }));
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await window.confirmationResult.confirm(smsCode);
+      console.log("Phone number verified:", result.user);
+      alert("Phone number verified successfully!");
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error(error);
+      setErrors((prev) => ({ ...prev, sms: "Invalid code, please try again" }));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const router = useRouter();
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 hover:scale-[1.02]">
-        <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">
-          {"SignUp"}
-        </h2>
-
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
+        <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">Sign Up</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                First Name
-              </label>
-              <input
-                type="text"
-                id="text"
-                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#173b2b] transition-all duration-300`}
-                placeholder="Enter your First Name"
-              />
-            </div>
-
-            <div className="relative flex-1">
-              <label
-                htmlFor="last-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="text"
-                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#173b2b] transition-all duration-300`}
-                placeholder="Enter your Last Name"
-              />
-            </div>
-          </div>
-
+          {/* Email Input */}
           <div className="relative">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
             </label>
             <input
@@ -118,98 +164,108 @@ const SignUp = () => {
               id="email"
               value={email}
               onChange={handleEmailChange}
-              className={`w-full px-4 py-3 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#173b2b] transition-all duration-300`}
+              className={`w-full px-4 py-3 rounded-lg border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder="Enter your email"
-              aria-invalid={errors.email ? "true" : "false"}
-              aria-describedby="email-error"
             />
-            {errors.email && (
-              <p
-                id="email-error"
-                className="mt-1 text-sm text-red-500"
-                role="alert"
-              >
-                {errors.email}
-              </p>
-            )}
-            {showSuggestions && (
-              <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg">
-                {commonDomains.map((domain) => (
-                  <button
-                    key={domain}
-                    type="button"
-                    onClick={() => applySuggestion(domain)}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    {email.split("@")[0] + domain}
-                  </button>
-                ))}
-              </div>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
           </div>
 
-
+          {/* Phone Input */}
           <div className="relative">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Password
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
             </label>
-            <div className="relative">
+            <div className="flex">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="px-4 py-3 border rounded-l-lg"
+              >
+                {countryCodes.map(({ code, country }) => (
+                  <option key={code} value={code}>
+                    {code} ({country})
+                  </option>
+                ))}
+              </select>
               <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={password}
-                onChange={handlePasswordChange}
-                className={`w-full px-4 py-3 rounded-lg border ${errors.password ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#173b2b] transition-all duration-300`}
-                placeholder="Enter your password"
-                aria-invalid={errors.password ? "true" : "false"}
-                aria-describedby="password-error"
+                type="text"
+                id="phone"
+                value={phone}
+                onChange={handlePhoneChange}
+                className={`flex-1 px-4 py-3 border rounded-r-lg ${
+                  errors.phone ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder="Enter your phone number"
+              />
+            </div>
+            {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
+          </div>
+
+          {/* SMS Code Verification */}
+          {window.confirmationResult && (
+            <div className="relative">
+              <label htmlFor="smsCode" className="block text-sm font-medium text-gray-700 mb-1">
+                SMS Code
+              </label>
+              <input
+                type="text"
+                id="smsCode"
+                value={smsCode}
+                onChange={(e) => setSmsCode(e.target.value)}
+                className="w-full px-4 py-3 border rounded-lg"
+                placeholder="Enter the SMS code"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={handleCodeVerification}
+                className="mt-2 w-full bg-[#173b2b] text-white py-2 rounded-lg"
               >
-                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                Verify Code
               </button>
+              {errors.sms && <p className="mt-1 text-sm text-red-500">{errors.sms}</p>}
             </div>
-            {errors.password && (
-              <p
-                id="password-error"
-                className="mt-1 text-sm text-red-500"
-                role="alert"
-              >
-                {errors.password}
-              </p>
-            )}
+          )}
+
+          {/* Password Input */}
+          <div className="relative">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              value={password}
+              onChange={handlePasswordChange}
+              className={`w-full px-4 py-3 rounded-lg border ${
+                errors.password ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            >
+              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+            </button>
+            {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
           </div>
 
+          {/* General Error */}
+          {errors.general && <p className="text-sm text-red-500 text-center">{errors.general}</p>}
+
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#173b2b] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5c46] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#173b2b] transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#173b2b] text-white py-3 rounded-lg"
           >
-            {loading ? (
-              <FaSpinner className="animate-spin mx-auto" size={24} />
-            ) :
-              "SignUp"
-            }
+            {loading ? <FaSpinner className="animate-spin mx-auto" /> : "Sign Up"}
           </button>
-
-          <p className="text-center text-sm text-gray-600">
-            {"Don't have an account?"}{" "}
-            <button
-              type="button"
-              onClick={()=>{router.push("/pages/login")}}
-              className="text-[#173b2b] font-semibold hover:underline focus:outline-none"
-            >
-              {"Login"}
-            </button>
-          </p>
         </form>
+        <div id="recaptcha-container"></div>
       </div>
     </div>
   );

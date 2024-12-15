@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface UserProfile {
   name: string;
@@ -10,6 +11,7 @@ interface UserProfile {
 }
 
 const EditProfilePage: React.FC<{ user: UserProfile }> = ({ user }) => {
+  const router = useRouter()
   const [formData, setFormData] = useState<UserProfile>({
     name: user.name,
     email: user.email,
@@ -30,6 +32,7 @@ const EditProfilePage: React.FC<{ user: UserProfile }> = ({ user }) => {
     // Here you would handle the save logic, like making an API call to update the profile
     console.log("Profile updated:", formData);
     alert("Profile updated successfully!");
+    router.push("/pages/profile");
   };
 
   return (

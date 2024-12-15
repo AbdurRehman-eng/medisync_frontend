@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 
 const SignUp = () => {
@@ -68,12 +68,44 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 hover:scale-[1.02]">
         <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">
           {"SignUp"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                First Name
+              </label>
+              <input
+                type="text"
+                id="text"
+                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#173b2b] transition-all duration-300`}
+                placeholder="Enter your First Name"
+              />
+            </div>
+
+            <div className="relative flex-1">
+              <label
+                htmlFor="last-name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="text"
+                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#173b2b] transition-all duration-300`}
+                placeholder="Enter your Last Name"
+              />
+            </div>
+          </div>
+
           <div className="relative">
             <label
               htmlFor="email"
@@ -115,6 +147,7 @@ const SignUp = () => {
               </div>
             )}
           </div>
+
 
           <div className="relative">
             <label

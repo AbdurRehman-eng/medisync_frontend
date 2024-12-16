@@ -13,7 +13,7 @@ const HeroTextArea = () => {
           className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight mb-10 mt-10 "
           aria-label="Hero heading: Your Health, Our Priority – Trusted Medicines Delivered"
         >
-          <span className="block bg-clip-text text-transparent bg-gradient-to-b from-[#1f8bc5] to-[#5ab5d3] ">
+          <span className="block bg-clip-text text-transparent bg-gradient-to-b from-[#001f3d] to-[#00457c] ">
             Your Health, Our Priority
           </span>
           <span className="block text-3xl md:text-4xl lg:text-5xl mt-4 text-gray-600">

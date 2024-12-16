@@ -13,6 +13,16 @@ export default {
         foreground: "var(--foreground)",
         lightBg: "#fffccc",
       },
+      backgroundImage: {
+        'custom-gradient': 'linear-gradient(to right, #001f3d, #00457c)', // Custom gradient
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['Georgia', 'serif'],
+      },
+      spacing: {
+        '18': '4.5rem', // Custom spacing value
+      },
     },
   },
   plugins: [],

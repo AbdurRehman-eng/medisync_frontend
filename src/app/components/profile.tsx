@@ -1,8 +1,9 @@
-"use client";
-import React from "react";
-import { useRouter } from "next/navigation";
+"use client"; // This line marks the component as a client component
 
-interface UserProfile {
+import React from "react";
+
+// Define the types for the user prop
+interface User {
   name: string;
   email: string;
   phone: string;
@@ -10,55 +11,51 @@ interface UserProfile {
   profilePicture: string;
 }
 
-const ProfilePage: React.FC<{ user: UserProfile }> = ({ user }) => {
-  const history = useRouter(); // Hook for navigation
-
-  const handleEditProfile = () => {
-    history.push("/pages/edit_profile"); // Redirect to EditProfilePage
-  };
-
+// ProfilePage component that accepts user data as props
+const ProfilePage = ({ user }: { user: User }) => {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
-      {/* Profile Header */}
-      <div className="w-full bg-green-600 py-6 flex justify-center">
-        <h1 className="text-white text-2xl font-semibold">User Profile</h1>
-      </div>
-
-      {/* Profile Card */}
-      <div className="bg-white shadow-lg rounded-lg mt-6 p-6 w-full max-w-md">
-        {/* Profile Picture */}
-        <div className="flex justify-center">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: 'linear-gradient(to right, #001f3d, #00457c)', // Custom navy blue gradient
+      }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
+        <div className="flex flex-col items-center">
           <img
             src={user.profilePicture}
-            alt="Profile Picture"
-            className="w-24 h-24 rounded-full border-4 border-green-500 object-cover"
+            alt={`${user.name}'s profile picture`}
+            className="w-32 h-32 rounded-full object-cover border-4 border-[#001f3d] mb-4"
           />
-        </div>
-
-        {/* User Information */}
-        <div className="mt-4 text-center">
-          <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
-          <p className="text-sm text-gray-600">{user.email}</p>
-        </div>
-
-        {/* Contact Details */}
-        <div className="mt-6">
-          <div className="mb-4">
-            <h3 className="text-gray-700 font-semibold">Phone</h3>
-            <p className="text-gray-600">{user.phone}</p>
+          <h2 className="text-4xl font-extrabold text-[#001f3d] mb-4">
+            {user.name}
+          </h2>
+          <div className="space-y-6">
+            <div>
+              <p className="text-xl font-medium text-[#003366]">Email:</p>
+              <p className="text-md text-[#4b7db3] border-2 border-[#001f3d] rounded-md px-4 py-2">
+                {user.email}
+              </p>
+            </div>
+            <div>
+              <p className="text-xl font-medium text-[#003366]">Phone:</p>
+              <p className="text-md text-[#4b7db3] border-2 border-[#001f3d] rounded-md px-4 py-2">
+                {user.phone}
+              </p>
+            </div>
+            <div>
+              <p className="text-xl font-medium text-[#003366]">Address:</p>
+              <p className="text-md text-[#4b7db3] border-2 border-[#001f3d] rounded-md px-4 py-2">
+                {user.address}
+              </p>
+            </div>
           </div>
-
-          <div>
-            <h3 className="text-gray-700 font-semibold">Address</h3>
-            <p className="text-gray-600">{user.address}</p>
-          </div>
         </div>
 
-        {/* Edit Button */}
-        <div className="mt-6 flex justify-center">
+        <div className="mt-8 text-center">
           <button
-            onClick={handleEditProfile}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            onClick={() => alert("Edit Profile")}
+            className="w-full bg-[#001f3d] text-white py-3 rounded-lg font-semibold hover:bg-[#003366] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001f3d] transform transition-all duration-300 hover:scale-[1.02]"
           >
             Edit Profile
           </button>

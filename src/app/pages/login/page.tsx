@@ -184,7 +184,7 @@ const LoginSignup = () => {
             {"Already have an account?"}{" "}
             <button
               type="button"
-              onClick={()=>{router.push("/pages/signup")}}
+              onClick={()=>{router.push("/pages/user_type")}}
               className="text-[#173b2b] font-semibold hover:underline focus:outline-none"
             >
               {"SignUp"}

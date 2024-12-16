@@ -17,6 +17,10 @@ function HomeScreen() {
     return (
         <div className="h-[100vh] w-[100vw] bg-[#fefdf8] overflow-x-hidden">
             <Nav />
+            <div className="bg-transparent h-20 w-[100w]"></div>
+            <HeroTextArea/>
+            <Footer/>
+        </div>
             <div className="bg-transparent h-20 w-[100vw]"></div>
             <HeroTextArea />
             <MedicineCard medicine={Paracetamol} />

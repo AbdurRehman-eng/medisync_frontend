@@ -2,35 +2,38 @@
 
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/app/supabase/supabaseclient';
+import { useRouter } from 'next/navigation';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/app/firebase/firebase'; // Import your Firebase app configuration
 
 interface DoctorData {
-  id: number | '';
   name: string;
   clinic_location: string;
   contact: string;
   specialization: string;
   email: string;
+  password: string;
 }
 
 export default function RegisterDoctor() {
   const [formData, setFormData] = useState<DoctorData>({
-    id: '',
     name: '',
     clinic_location: '',
     contact: '',
     specialization: '',
     email: '',
+    password: '',
   });
-
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   // Handle form input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? Number(value) : value,
+      [name]: value,
     }));
   };
 
@@ -39,33 +42,81 @@ export default function RegisterDoctor() {
     e.preventDefault();
 
     // Ensure all fields are filled
-    if (!formData.id || !formData.name || !formData.clinic_location || !formData.contact || !formData.specialization || !formData.email) {
+    if (!formData.name || !formData.clinic_location || !formData.contact || !formData.specialization || !formData.email || !formData.password) {
       setError('Please fill in all fields');
       return;
     }
 
     try {
-      const { data, error } = await supabase.from('doctor').insert([formData]);
+      // Register the user with Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
 
-      if (error) {
-        setError(`Error: ${error.message}`);
-        setSuccessMessage('');
-      } else {
-        setSuccessMessage('Doctor registered successfully!');
-        setError('');
+      // Step 1: Fetch the maximum `id` from the doctor table
+      const { data: doctorMaxData, error: doctorMaxError } = await supabase
+        .from('doctor')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1);
 
-        // Reset form
-        setFormData({
-          id: '',
-          name: '',
-          clinic_location: '',
-          contact: '',
-          specialization: '',
-          email: '',
-        });
+      if (doctorMaxError) throw new Error(doctorMaxError.message);
+
+      let newDoctorId = 1; // Default to 1 if no doctor exists
+      if (doctorMaxData && doctorMaxData.length > 0) {
+        newDoctorId = doctorMaxData[0].id + 1; // Increment the max id
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
+
+      // Step 2: Insert the doctor into the doctor table with the calculated ID
+      const { data: doctorData, error: doctorError } = await supabase
+        .from('doctor')
+        .insert([
+          {
+            id: newDoctorId, // Use the calculated doctor ID
+            name: formData.name,
+            clinic_location: formData.clinic_location,
+            contact: formData.contact,
+            specialization: formData.specialization,
+            email: formData.email,
+            password: formData.password, // Store the password
+          },
+        ])
+        .select('*')
+        .single();
+
+      if (doctorError) throw new Error(doctorError.message);
+
+      // Step 3: Insert the user into the user table
+      const { error: userInsertError } = await supabase
+        .from('user')
+        .insert([
+          {
+            user_id: newDoctorId, // Use the same ID
+            id: newDoctorId,
+            type: 'doctor',
+          },
+        ]);
+
+      if (userInsertError) throw new Error(userInsertError.message);
+
+      // Step 4: Set success message and reset form
+      setSuccessMessage('Doctor registered successfully!');
+      setError('');
+
+      // Reset form
+      setFormData({
+        name: '',
+        clinic_location: '',
+        contact: '',
+        specialization: '',
+        email: '',
+        password: '',
+      });
+
+      // Redirect to the dashboard
+      router.push('/pages/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+      setSuccessMessage('');
     }
   };
 
@@ -80,87 +131,36 @@ export default function RegisterDoctor() {
       {successMessage && <div style={{ color: 'green', marginBottom: '10px', textAlign: 'center' }}>{successMessage}</div>}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label htmlFor="id" style={{ marginBottom: '5px', fontWeight: 'bold' }}>ID:</label>
-          <input
-            type="number"
-            name="id"
-            id="id"
-            value={formData.id}
-            onChange={handleChange}
-            style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            required
-          />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label htmlFor="name" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Name:</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={formData.name}
-            onChange={handleChange}
-            style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            required
-          />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label htmlFor="clinic_location" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Clinic Location:</label>
-          <input
-            type="text"
-            name="clinic_location"
-            id="clinic_location"
-            value={formData.clinic_location}
-            onChange={handleChange}
-            style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            required
-          />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label htmlFor="contact" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Contact:</label>
-          <input
-            type="text"
-            name="contact"
-            id="contact"
-            value={formData.contact}
-            onChange={handleChange}
-            style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            required
-          />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label htmlFor="specialization" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Specialization:</label>
-          <input
-            type="text"
-            name="specialization"
-            id="specialization"
-            value={formData.specialization}
-            onChange={handleChange}
-            style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            required
-          />
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label htmlFor="email" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Email:</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={formData.email}
-            onChange={handleChange}
-            style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            required
-          />
-        </div>
+        {/* Form Fields */}
+        {['name', 'clinic_location', 'contact', 'specialization', 'email', 'password'].map((field) => (
+          <div style={{ display: 'flex', flexDirection: 'column' }} key={field}>
+            <label htmlFor={field} style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+              {field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}:
+            </label>
+            <input
+              type={field === 'email' ? 'email' : field === 'password' ? 'password' : 'text'}
+              name={field}
+              id={field}
+              value={formData[field as keyof DoctorData]}
+              onChange={handleChange}
+              style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+              required
+            />
+          </div>
+        ))}
 
         <button
           type="submit"
-          style={{ padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', transition: 'background-color 0.3s' }}
+          style={{
+            padding: '10px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            transition: 'background-color 0.3s',
+          }}
           onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#45a049')}
           onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#4CAF50')}
         >

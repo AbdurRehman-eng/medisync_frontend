@@ -14,7 +14,7 @@ function HomeScreen() {
             <div className="bg-transparent h-20 w-[100w]"></div>
             <HeroTextArea/>
             <Footer/>
-        </>
+        </div>
     );
 }
 

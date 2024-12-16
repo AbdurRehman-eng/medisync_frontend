@@ -53,7 +53,7 @@ const SignUp: React.FC = () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       alert("Sign-up successful.");
-      router.push("/pages/login");
+      router.push("/pages/dashboard");
     } catch (error: any) {
       const errorMessage = firebaseErrorMessages(error.code);
       setErrors((prev) => ({ ...prev, general: errorMessage }));

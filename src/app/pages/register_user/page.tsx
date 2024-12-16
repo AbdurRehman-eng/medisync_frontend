@@ -84,6 +84,7 @@ function RegisterPatient() {
         {
           id: newId, // Use the same manually assigned ID
           type: "patient",
+          email: formData.email
         },
       ]);
 

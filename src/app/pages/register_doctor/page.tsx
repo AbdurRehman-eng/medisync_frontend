@@ -93,6 +93,7 @@ export default function RegisterDoctor() {
             user_id: newDoctorId, // Use the same ID
             id: newDoctorId,
             type: 'doctor',
+            email: formData.email
           },
         ]);
 

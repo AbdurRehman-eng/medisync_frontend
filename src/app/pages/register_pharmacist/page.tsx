@@ -3,6 +3,8 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/app/firebase/firebase";
 
 function RegisterPharmacist() {
   const [formData, setFormData] = useState({
@@ -10,8 +12,9 @@ function RegisterPharmacist() {
     address: "",
     email: "",
     phone: "",
+    password: "",
   });
-  const router = useRouter()
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>("");
 
@@ -24,16 +27,33 @@ function RegisterPharmacist() {
     }));
   };
 
+  // Validate email format
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.address || !formData.email || !formData.phone) {
+    const { name, address, email, phone, password } = formData;
+
+    if (!name || !address || !email || !phone || !password) {
       setError("Please fill in all fields");
       return;
     }
 
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     try {
+      // Register email and password with Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+
       // Step 1: Get the highest ID from the pharmacist table
       const { data: maxIdData, error: maxIdError } = await supabase
         .from("pharmacist")
@@ -56,10 +76,11 @@ function RegisterPharmacist() {
         .insert([
           {
             id: newId, // Assign the new ID manually
-            name: formData.name,
-            address: formData.address,
-            email: formData.email,
-            phone: formData.phone,
+            name,
+            address,
+            email,
+            phone,
+            password
           },
         ]);
 
@@ -82,7 +103,7 @@ function RegisterPharmacist() {
       }
 
       setSuccessMessage("Pharmacist registered successfully!");
-      setError("");
+      setError(null);
 
       // Reset form
       setFormData({
@@ -90,10 +111,11 @@ function RegisterPharmacist() {
         address: "",
         email: "",
         phone: "",
+        password: "",
       });
-      router.push("/pages/dashboard")
-    } catch (err) {
-      setError("An unexpected error occurred.");
+      router.push("/pages/dashboard");
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
     }
   };
 
@@ -170,6 +192,21 @@ function RegisterPharmacist() {
             name="phone"
             id="phone"
             value={formData.phone}
+            onChange={handleChange}
+            style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }}
+            required
+          />
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+          <label htmlFor="password" style={{ fontWeight: "bold" }}>
+            Password:
+          </label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            value={formData.password}
             onChange={handleChange}
             style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }}
             required

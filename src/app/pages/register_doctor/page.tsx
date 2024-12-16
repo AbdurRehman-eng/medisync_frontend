@@ -3,6 +3,8 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/app/supabase/supabaseclient';
 import { useRouter } from 'next/navigation';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/app/firebase/firebase'; // Import your Firebase app configuration
 
 interface DoctorData {
   name: string;
@@ -10,6 +12,7 @@ interface DoctorData {
   contact: string;
   specialization: string;
   email: string;
+  password: string;
 }
 
 export default function RegisterDoctor() {
@@ -19,6 +22,7 @@ export default function RegisterDoctor() {
     contact: '',
     specialization: '',
     email: '',
+    password: '',
   });
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -38,12 +42,16 @@ export default function RegisterDoctor() {
     e.preventDefault();
 
     // Ensure all fields are filled
-    if (!formData.name || !formData.clinic_location || !formData.contact || !formData.specialization || !formData.email) {
+    if (!formData.name || !formData.clinic_location || !formData.contact || !formData.specialization || !formData.email || !formData.password) {
       setError('Please fill in all fields');
       return;
     }
 
     try {
+      // Register the user with Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
       // Step 1: Fetch the maximum `id` from the doctor table
       const { data: doctorMaxData, error: doctorMaxError } = await supabase
         .from('doctor')
@@ -58,21 +66,7 @@ export default function RegisterDoctor() {
         newDoctorId = doctorMaxData[0].id + 1; // Increment the max id
       }
 
-      // Step 2: Fetch the maximum `user_id` from the user table
-      const { data: userMaxData, error: userMaxError } = await supabase
-        .from('user')
-        .select('user_id')
-        .order('user_id', { ascending: false })
-        .limit(1);
-
-      if (userMaxError) throw new Error(userMaxError.message);
-
-      let newUserId = 1; // Default to 1 if no user exists
-      if (userMaxData && userMaxData.length > 0) {
-        newUserId = userMaxData[0].user_id + 1; // Increment the max user_id
-      }
-
-      // Step 3: Insert the doctor into the doctor table with the calculated ID
+      // Step 2: Insert the doctor into the doctor table with the calculated ID
       const { data: doctorData, error: doctorError } = await supabase
         .from('doctor')
         .insert([
@@ -83,6 +77,7 @@ export default function RegisterDoctor() {
             contact: formData.contact,
             specialization: formData.specialization,
             email: formData.email,
+            password: formData.password, // Store the password
           },
         ])
         .select('*')
@@ -90,23 +85,20 @@ export default function RegisterDoctor() {
 
       if (doctorError) throw new Error(doctorError.message);
 
-      // Log inserted doctor data for debugging
-      console.log('Inserted doctor data:', doctorData);
-
-      // Step 4: Insert the user into the user table with the calculated user_id
+      // Step 3: Insert the user into the user table
       const { error: userInsertError } = await supabase
         .from('user')
         .insert([
           {
-            user_id: newUserId, // Use the calculated user ID
-            id: newDoctorId, // Link this user to the doctor using the same ID
+            user_id: newDoctorId, // Use the same ID
+            id: newDoctorId,
             type: 'doctor',
           },
         ]);
 
       if (userInsertError) throw new Error(userInsertError.message);
 
-      // Step 5: Set success message and reset form
+      // Step 4: Set success message and reset form
       setSuccessMessage('Doctor registered successfully!');
       setError('');
 
@@ -117,6 +109,7 @@ export default function RegisterDoctor() {
         contact: '',
         specialization: '',
         email: '',
+        password: '',
       });
 
       // Redirect to the dashboard
@@ -139,13 +132,13 @@ export default function RegisterDoctor() {
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         {/* Form Fields */}
-        {['name', 'clinic_location', 'contact', 'specialization', 'email'].map((field) => (
+        {['name', 'clinic_location', 'contact', 'specialization', 'email', 'password'].map((field) => (
           <div style={{ display: 'flex', flexDirection: 'column' }} key={field}>
             <label htmlFor={field} style={{ marginBottom: '5px', fontWeight: 'bold' }}>
               {field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}:
             </label>
             <input
-              type={field === 'email' ? 'email' : 'text'}
+              type={field === 'email' ? 'email' : field === 'password' ? 'password' : 'text'}
               name={field}
               id={field}
               value={formData[field as keyof DoctorData]}

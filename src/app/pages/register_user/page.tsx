@@ -3,6 +3,8 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/app/firebase/firebase";  // Import Firebase auth configuration
 
 function RegisterPatient() {
   const [formData, setFormData] = useState({
@@ -111,6 +113,13 @@ function RegisterPatient() {
         return;
       }
   
+      // Firebase Registration (Example)
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      if (userCredential.user) {
+        // Handle successful user creation with Firebase
+        console.log("Firebase User created:", userCredential.user);
+      }
+  
       // Success message
       setSuccessMessage("Patient registered successfully!");
       setError(null);
@@ -127,12 +136,12 @@ function RegisterPatient() {
   
       // Redirect to login page
       router.push("/pages/login");
-    } catch (err) {
-      setError("An unexpected error occurred.");
+    } catch (err: any) {
+      // Handle errors thrown during the process
+      setError(`An error occurred: ${err.message}`);
     }
-  };
+  };  
   
-
   return (
     <div
       style={{

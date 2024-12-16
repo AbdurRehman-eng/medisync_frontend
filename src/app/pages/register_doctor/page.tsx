@@ -2,9 +2,9 @@
 
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/app/supabase/supabaseclient';
+import { useRouter } from 'next/navigation';
 
 interface DoctorData {
-  id: number | '';
   name: string;
   clinic_location: string;
   contact: string;
@@ -14,54 +14,114 @@ interface DoctorData {
 
 export default function RegisterDoctor() {
   const [formData, setFormData] = useState<DoctorData>({
-    id: '',
     name: '',
     clinic_location: '',
     contact: '',
     specialization: '',
     email: '',
   });
-
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: type === 'number' ? Number(value) : value,
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!formData.id || !formData.name || !formData.clinic_location || !formData.contact || !formData.specialization || !formData.email) {
+    // Ensure all fields are filled
+    if (!formData.name || !formData.clinic_location || !formData.contact || !formData.specialization || !formData.email) {
       setError('Please fill in all fields');
       return;
     }
 
     try {
-      const { error } = await supabase.from('doctor').insert([formData]);
+      // Step 1: Fetch the maximum `id` from the doctor table
+      const { data: doctorMaxData, error: doctorMaxError } = await supabase
+        .from('doctor')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1);
 
-      if (error) {
-        setError(`Error: ${error.message}`);
-        setSuccessMessage('');
-      } else {
-        setSuccessMessage('Doctor registered successfully!');
-        setError('');
+      if (doctorMaxError) throw new Error(doctorMaxError.message);
 
-        setFormData({
-          id: '',
-          name: '',
-          clinic_location: '',
-          contact: '',
-          specialization: '',
-          email: '',
-        });
+      let newDoctorId = 1; // Default to 1 if no doctor exists
+      if (doctorMaxData && doctorMaxData.length > 0) {
+        newDoctorId = doctorMaxData[0].id + 1; // Increment the max id
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
+
+      // Step 2: Fetch the maximum `user_id` from the user table
+      const { data: userMaxData, error: userMaxError } = await supabase
+        .from('user')
+        .select('user_id')
+        .order('user_id', { ascending: false })
+        .limit(1);
+
+      if (userMaxError) throw new Error(userMaxError.message);
+
+      let newUserId = 1; // Default to 1 if no user exists
+      if (userMaxData && userMaxData.length > 0) {
+        newUserId = userMaxData[0].user_id + 1; // Increment the max user_id
+      }
+
+      // Step 3: Insert the doctor into the doctor table with the calculated ID
+      const { data: doctorData, error: doctorError } = await supabase
+        .from('doctor')
+        .insert([
+          {
+            id: newDoctorId, // Use the calculated doctor ID
+            name: formData.name,
+            clinic_location: formData.clinic_location,
+            contact: formData.contact,
+            specialization: formData.specialization,
+            email: formData.email,
+          },
+        ])
+        .select('*')
+        .single();
+
+      if (doctorError) throw new Error(doctorError.message);
+
+      // Log inserted doctor data for debugging
+      console.log('Inserted doctor data:', doctorData);
+
+      // Step 4: Insert the user into the user table with the calculated user_id
+      const { error: userInsertError } = await supabase
+        .from('user')
+        .insert([
+          {
+            user_id: newUserId, // Use the calculated user ID
+            id: newDoctorId, // Link this user to the doctor using the same ID
+            type: 'doctor',
+          },
+        ]);
+
+      if (userInsertError) throw new Error(userInsertError.message);
+
+      // Step 5: Set success message and reset form
+      setSuccessMessage('Doctor registered successfully!');
+      setError('');
+
+      // Reset form
+      setFormData({
+        name: '',
+        clinic_location: '',
+        contact: '',
+        specialization: '',
+        email: '',
+      });
+
+      // Redirect to the dashboard
+      router.push('/pages/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+      setSuccessMessage('');
     }
   };
 

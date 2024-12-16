@@ -1,133 +1,265 @@
 "use client";
 
+import { useState, ChangeEvent, FormEvent } from "react";
+import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/firebase/firebase";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
 
-const SignUp: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({
+function RegisterPatient() {
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    address: "",
+    contact: "",
     email: "",
     password: "",
-    general: "",
   });
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    setErrors((prev) => ({
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      email: validateEmail(e.target.value) ? "" : "Invalid email format",
+      [name]: value,
     }));
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    setErrors((prev) => ({
-      ...prev,
-      password: e.target.value.length >= 8 ? "" : "Password must be at least 8 characters",
-    }));
-  };
-
-  const firebaseErrorMessages = (code: string) => {
-    const errorMap: { [key: string]: string } = {
-      "auth/email-already-in-use": "This email is already registered.",
-      "auth/invalid-email": "Please enter a valid email address.",
-      "auth/weak-password": "Password must be at least 6 characters long.",
-    };
-    return errorMap[code] || "An unexpected error occurred.";
-  };
-
-  const handleSignUpWithEmail = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (errors.email || errors.password || !email || !password) return;
 
-    setLoading(true);
+    if (
+      !formData.first_name ||
+      !formData.last_name ||
+      !formData.address ||
+      !formData.contact ||
+      !formData.email ||
+      !formData.password
+    ) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert("Sign-up successful.");
-      router.push("/pages/login");
-    } catch (error: any) {
-      const errorMessage = firebaseErrorMessages(error.code);
-      setErrors((prev) => ({ ...prev, general: errorMessage }));
-    } finally {
-      setLoading(false);
+      const { data: maxIdData, error: maxIdError } = await supabase
+        .from("patient")
+        .select("id")
+        .order("id", { ascending: false })
+        .limit(1);
+
+      if (maxIdError) {
+        setError(`Error retrieving ID: ${maxIdError.message}`);
+        return;
+      }
+
+      const highestId = maxIdData?.[0]?.id || 0;
+      const newId = highestId + 1;
+
+      const { data: patientData, error: patientError } = await supabase
+        .from("patient")
+        .insert([
+          {
+            id: newId,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            address: formData.address,
+            contact: formData.contact,
+            email: formData.email,
+            password: formData.password,
+          },
+        ]);
+
+      if (patientError) {
+        setError(`Error adding patient: ${patientError.message}`);
+        return;
+      }
+
+      const { error: userInsertError } = await supabase.from("user").insert([
+        {
+          id: newId,
+          type: "patient",
+        },
+      ]);
+
+      if (userInsertError) {
+        setError(`Error adding user: ${userInsertError.message}`);
+        return;
+      }
+
+      setSuccessMessage("Patient registered successfully!");
+      setError(null);
+
+      setFormData({
+        first_name: "",
+        last_name: "",
+        address: "",
+        contact: "",
+        email: "",
+        password: "",
+      });
+
+      router.push("/pages/dashboard");
+    } catch (err) {
+      setError("An unexpected error occurred.");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">Sign Up</h2>
-        <form onSubmit={handleSignUpWithEmail} className="space-y-6">
-          {/* Email Input */}
-          <div className="relative">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{
+        background: "linear-gradient(to right, #001f3d, #00457c)",
+      }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 hover:scale-[1.02]">
+        <h2 className="text-3xl font-extrabold text-[#001f3d] text-center mb-6">
+          Register Patient
+        </h2>
+
+        {error && (
+          <div className="text-red-600 text-center mb-4 bg-red-100 p-2 rounded">
+            {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="text-green-600 text-center mb-4 bg-green-100 p-2 rounded">
+            {successMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="first_name"
+                className="block text-lg font-medium text-[#003366]"
+              >
+                First Name
+              </label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                placeholder="e.g., Abdullah"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="last_name"
+                className="block text-lg font-medium text-[#003366]"
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                placeholder="e.g., Ijaz"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-lg font-medium text-[#003366]"
+            >
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="e.g., 123 Main Street"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="contact"
+              className="block text-lg font-medium text-[#003366]"
+            >
+              Contact
+            </label>
+            <input
+              type="text"
+              id="contact"
+              name="contact"
+              value={formData.contact}
+              onChange={handleChange}
+              placeholder="e.g., +923456789012"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-lg font-medium text-[#003366]"
+            >
+              Email
             </label>
             <input
               type="email"
               id="email"
-              value={email}
-              onChange={handleEmailChange}
-              className={`w-full px-4 py-3 rounded-lg border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder="Enter your email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="e.g., abc@example.com"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
             />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
           </div>
 
-          {/* Password Input */}
-          <div className="relative">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-lg font-medium text-[#003366]"
+            >
               Password
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                value={password}
-                onChange={handlePasswordChange}
-                className={`w-full px-4 py-3 rounded-lg border ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="Enter your password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter a secure password"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
               />
-              <div
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute top-1/2 right-4 transform -translate-y-1/2 text-[#00457c] hover:text-[#001f3d]"
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </div>
+                {showPassword ? <FaEye size={20} />:  <FaEyeSlash size={20} /> }
+              </button>
             </div>
-            {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
           </div>
 
-          {/* General Error */}
-          {errors.general && <p className="mt-4 text-center text-red-500">{errors.general}</p>}
-
-          {/* Submit Button */}
           <button
             type="submit"
-            className={`w-full py-3 rounded-lg text-white bg-[#173b2b] hover:bg-[#105d3c] flex items-center justify-center ${
-              loading ? "opacity-70" : ""
-            }`}
-            disabled={loading}
+            className="w-full bg-[#001f3d] text-white py-3 rounded-lg font-semibold hover:bg-[#003366] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001f3d] transform transition-all duration-300 hover:scale-[1.02]"
           >
-            {loading ? <FaSpinner className="animate-spin" /> : "Sign Up"}
+            Register Patient
           </button>
         </form>
       </div>
     </div>
   );
-};
+}
 
-export default SignUp;
+export default RegisterPatient;

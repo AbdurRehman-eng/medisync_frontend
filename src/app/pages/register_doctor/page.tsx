@@ -90,7 +90,7 @@ export default function RegisterDoctor() {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* ID */}
           <div>
             <label htmlFor="id" className="block text-lg font-medium text-[#003366]">

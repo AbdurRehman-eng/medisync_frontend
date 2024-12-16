@@ -21,18 +21,18 @@ const ProfilePage = ({ user }: { user: User }) => {
       }}
     >
       {/* Card container */}
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-105">
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
         {/* Profile Section */}
         <div className="flex flex-col items-center">
           <img
             src={user.profilePicture}
             alt={`${user.name}'s profile picture`}
-            className="w-32 h-32 rounded-full object-cover border-4 border-[#001f3d] mb-4 transform transition-all duration-300 hover:scale-110"
+            className="w-32 h-32 rounded-full object-cover border-4 border-[#001f3d] mb-4 "
           />
-          <h2 className="text-4xl font-extrabold text-[#001f3d] mb-4 transition-all duration-300 hover:text-[#00457c]">
+          <h2 className="text-4xl font-extrabold text-[#001f3d] mb-4 ">
             {user.name}
           </h2>
-          <div className="space-y-6 w-full">
+          <div className="space-y-4 w-full">
             {/* Email */}
             <div className="transition-all duration-300">
               <p className="text-lg font-semibold text-[#003366] transition-all duration-300">

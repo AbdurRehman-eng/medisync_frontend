@@ -5,7 +5,7 @@ import { signOut, User } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/app/firebase/firebase";
 
-function UserDashboard() {
+function PharmacistDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +44,7 @@ function UserDashboard() {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-10 rounded-xl shadow-2xl max-w-lg w-full">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome to the Dashboard
+          Pharmacist Dashboard
         </h1>
         {user && (
           <p className="text-center text-lg text-gray-600 mb-8">
@@ -60,22 +60,16 @@ function UserDashboard() {
             Go to Profile
           </button>
           <button
-            onClick={() => router.push("/pages/check_appointment")}
+            onClick={() => router.push("/pages/search")}
             className="w-full px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
           >
-            Check Appointments
+            Search Medicine
           </button>
           <button
-            onClick={() => router.push("/pages/appointment_status")}
+            onClick={() => router.push("/pages/available_medicines")}
             className="w-full px-6 py-3 bg-purple-600 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition"
           >
-            Appointment Status
-          </button>
-          <button
-            onClick={() => router.push("/pages/search")}
-            className="w-full px-6 py-3 bg-indigo-600 text-white text-lg font-semibold rounded-lg hover:bg-indigo-700 transition"
-          >
-            Go to Search
+            Available Medicines
           </button>
           <button
             onClick={handleSignOut}
@@ -89,4 +83,4 @@ function UserDashboard() {
   );
 }
 
-export default UserDashboard;
+export default PharmacistDashboard;

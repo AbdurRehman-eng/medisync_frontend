@@ -3,34 +3,40 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // FontAwesome for password visibility toggle
 
 export default function RegisterPharmacist() {
   const [formData, setFormData] = useState({
-    name: "",
+    name: "", // Single name field
+    pharmacy_name: "",
     address: "",
+    contact: "",
     email: "",
-    phone: "",
+    password: "",
   });
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>("");
-
-  // Validation function
-  const validateForm = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\+?[0-9]{10,15}$/;
-
-    if (!formData.name.trim()) return "Name is required.";
-    if (!formData.address.trim()) return "Address is required.";
-    if (!emailRegex.test(formData.email)) return "Invalid email format.";
-    if (!phoneRegex.test(formData.phone)) return "Invalid phone number format.";
-    return null;
-  };
 
   // Handle input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Form validation
+  const validateForm = () => {
+    if (!formData.name.trim()) return "Name is required.";
+    if (!formData.pharmacy_name.trim()) return "Pharmacy name is required.";
+    if (!formData.address.trim()) return "Address is required.";
+    if (!formData.contact.trim() || !/^\+?[0-9]{10,15}$/.test(formData.contact))
+      return "Invalid contact number.";
+    if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email))
+      return "Invalid email address.";
+    if (!formData.password.trim() || formData.password.length < 6)
+      return "Password must be at least 6 characters long.";
+    return null;
   };
 
   // Handle form submission
@@ -39,7 +45,6 @@ export default function RegisterPharmacist() {
     setError(null);
     setSuccessMessage("");
 
-    // Validate the form
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -47,7 +52,6 @@ export default function RegisterPharmacist() {
     }
 
     try {
-      // Step 1: Get the highest ID from the pharmacist table
       const { data: maxIdData, error: maxIdError } = await supabase
         .from("pharmacist")
         .select("id")
@@ -59,43 +63,49 @@ export default function RegisterPharmacist() {
         return;
       }
 
-      // Determine the new ID
-      const highestId = maxIdData?.[0]?.id || 0; // If no rows exist, start with ID 1
+      const highestId = maxIdData?.[0]?.id || 0;
       const newId = highestId + 1;
 
-      // Step 2: Insert into the pharmacist table
-      const { error: pharmacistError } = await supabase.from("pharmacist").insert([
-        {
-          id: newId, // Assign the new ID manually
-          name: formData.name,
+      const { data: pharmacistData, error: pharmacistError } = await supabase
+        .from("pharmacist")
+        .insert([{
+          id: newId,
+          name: formData.name, // Single name field
+          pharmacy_name: formData.pharmacy_name,
           address: formData.address,
+          phone: formData.contact,
           email: formData.email,
-          phone: formData.phone,
-        },
-      ]);
+          password: formData.password,
+        }]);
 
       if (pharmacistError) {
         setError(`Error adding pharmacist: ${pharmacistError.message}`);
         return;
       }
 
-      // Step 3: Insert into the user table
-      const { error: userInsertError } = await supabase.from("user").insert([
-        {
-          id: newId, // Use the same ID
-          type: "pharmacist",
-        },
-      ]);
+      const { error: userInsertError } = await supabase.from("user").insert([{
+        id: newId,
+        type: "pharmacist",
+      }]);
 
       if (userInsertError) {
         setError(`Error adding user: ${userInsertError.message}`);
         return;
       }
 
-      // Success
       setSuccessMessage("Pharmacist registered successfully!");
-      setFormData({ name: "", address: "", email: "", phone: "" });
-      setTimeout(() => router.push("/pages/dashboard"), 2000); // Redirect to dashboard after success
+      setError(null);
+
+      setFormData({
+        name: "",
+        pharmacy_name: "",
+        address: "",
+        contact: "",
+        email: "",
+        password: "",
+      });
+
+      router.push("/pages/dashboard");
     } catch (err) {
       setError("An unexpected error occurred.");
     }
@@ -104,29 +114,28 @@ export default function RegisterPharmacist() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-6"
-      style={{ background: "linear-gradient(to right, #001f3d, #00457c)" }}
+      style={{
+        background: "linear-gradient(to right, #001f3d, #00457c)",
+      }}
     >
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
-        <h1 className="text-3xl font-extrabold text-[#001f3d] text-center mb-6">
-          Register Pharmacist
-        </h1>
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 hover:scale-[1.02]">
+        <h2 className="text-3xl font-extrabold text-[#001f3d] text-center mb-6">
+          Register as a Pharmacist
+        </h2>
 
-        {/* Error Message */}
         {error && (
           <div className="text-red-600 text-center mb-4 bg-red-100 p-2 rounded">
             {error}
           </div>
         )}
 
-        {/* Success Message */}
         {successMessage && (
           <div className="text-green-600 text-center mb-4 bg-green-100 p-2 rounded">
             {successMessage}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="name"
@@ -138,33 +147,67 @@ export default function RegisterPharmacist() {
               type="text"
               id="name"
               name="name"
-              placeholder="e.g., Abdullah Ijaz"
               value={formData.name}
               onChange={handleChange}
+              placeholder="e.g., Abdullah Ijaz"
               className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
             />
           </div>
 
-          {/* Address */}
+          <div>
+            <label
+              htmlFor="pharmacy_name"
+              className="block text-lg font-medium text-[#003366]"
+            >
+              Pharmacy Name
+            </label>
+            <input
+              type="text"
+              id="pharmacy_name"
+              name="pharmacy_name"
+              value={formData.pharmacy_name}
+              onChange={handleChange}
+              placeholder="e.g., Central Pharmacy"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+            />
+          </div>
+
           <div>
             <label
               htmlFor="address"
               className="block text-lg font-medium text-[#003366]"
             >
-              Pharmacy Address
+              Address
             </label>
             <input
               type="text"
               id="address"
               name="address"
-              placeholder="e.g., 123 Main St, City"
               value={formData.address}
               onChange={handleChange}
+              placeholder="e.g., 123 Main Street"
               className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
             />
           </div>
 
-          {/* Email */}
+          <div>
+            <label
+              htmlFor="contact"
+              className="block text-lg font-medium text-[#003366]"
+            >
+              Contact
+            </label>
+            <input
+              type="text"
+              id="contact"
+              name="contact"
+              value={formData.contact}
+              onChange={handleChange}
+              placeholder="e.g., +923456789012"
+              className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+            />
+          </div>
+
           <div>
             <label
               htmlFor="email"
@@ -176,33 +219,40 @@ export default function RegisterPharmacist() {
               type="email"
               id="email"
               name="email"
-              placeholder="e.g., abc@example.com"
               value={formData.email}
               onChange={handleChange}
+              placeholder="e.g., abc@example.com"
               className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
             />
           </div>
 
-          {/* Phone */}
           <div>
             <label
-              htmlFor="phone"
+              htmlFor="password"
               className="block text-lg font-medium text-[#003366]"
             >
-              Phone
+              Password
             </label>
-            <input
-              type="text"
-              id="phone"
-              name="phone"
-              placeholder="e.g., +923456789012"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter a secure password"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#001f3d] focus:outline-none focus:ring-2 focus:ring-[#00457c] transition-all duration-300"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute top-1/2 right-4 transform -translate-y-1/2 text-[#00457c] hover:text-[#001f3d]"
+              >
+                {showPassword ? <FaEye size={20} /> : <FaEyeSlash size={20} />}
+              </button>
+            </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-[#001f3d] text-white py-3 rounded-lg font-semibold hover:bg-[#003366] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001f3d] transform transition-all duration-300 hover:scale-[1.02]"

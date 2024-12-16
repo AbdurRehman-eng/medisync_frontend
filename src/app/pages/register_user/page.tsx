@@ -3,9 +3,9 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // FontAwesome for password visibility toggle
 
-function RegisterPatient() {
+export default function RegisterPatient() {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -19,26 +19,35 @@ function RegisterPatient() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>("");
 
+  // Handle input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Form validation
+  const validateForm = () => {
+    if (!formData.first_name.trim()) return "First name is required.";
+    if (!formData.last_name.trim()) return "Last name is required.";
+    if (!formData.address.trim()) return "Address is required.";
+    if (!formData.contact.trim() || !/^\+?[0-9]{10,15}$/.test(formData.contact))
+      return "Invalid contact number.";
+    if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email))
+      return "Invalid email address.";
+    if (!formData.password.trim() || formData.password.length < 6)
+      return "Password must be at least 6 characters long.";
+    return null;
+  };
+
+  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+    setSuccessMessage("");
 
-    if (
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.address ||
-      !formData.contact ||
-      !formData.email ||
-      !formData.password
-    ) {
-      setError("Please fill in all fields");
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -59,29 +68,25 @@ function RegisterPatient() {
 
       const { data: patientData, error: patientError } = await supabase
         .from("patient")
-        .insert([
-          {
-            id: newId,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            address: formData.address,
-            contact: formData.contact,
-            email: formData.email,
-            password: formData.password,
-          },
-        ]);
+        .insert([{
+          id: newId,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          address: formData.address,
+          contact: formData.contact,
+          email: formData.email,
+          password: formData.password,
+        }]);
 
       if (patientError) {
         setError(`Error adding patient: ${patientError.message}`);
         return;
       }
 
-      const { error: userInsertError } = await supabase.from("user").insert([
-        {
-          id: newId,
-          type: "patient",
-        },
-      ]);
+      const { error: userInsertError } = await supabase.from("user").insert([{
+        id: newId,
+        type: "patient",
+      }]);
 
       if (userInsertError) {
         setError(`Error adding user: ${userInsertError.message}`);
@@ -245,7 +250,7 @@ function RegisterPatient() {
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute top-1/2 right-4 transform -translate-y-1/2 text-[#00457c] hover:text-[#001f3d]"
               >
-                {showPassword ? <FaEye size={20} />:  <FaEyeSlash size={20} /> }
+                {showPassword ? <FaEye size={20} /> : <FaEyeSlash size={20} />}
               </button>
             </div>
           </div>
@@ -261,5 +266,3 @@ function RegisterPatient() {
     </div>
   );
 }
-
-export default RegisterPatient;

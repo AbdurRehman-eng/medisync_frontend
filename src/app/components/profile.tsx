@@ -17,45 +17,59 @@ const ProfilePage = ({ user }: { user: User }) => {
     <div
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        background: 'linear-gradient(to right, #001f3d, #00457c)', // Custom navy blue gradient
+        background: "linear-gradient(to right, #001f3d, #00457c)", // Custom navy blue gradient
       }}
     >
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
+      {/* Card container */}
+      <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-105">
+        {/* Profile Section */}
         <div className="flex flex-col items-center">
           <img
             src={user.profilePicture}
             alt={`${user.name}'s profile picture`}
-            className="w-32 h-32 rounded-full object-cover border-4 border-[#001f3d] mb-4"
+            className="w-32 h-32 rounded-full object-cover border-4 border-[#001f3d] mb-4 transform transition-all duration-300 hover:scale-110"
           />
-          <h2 className="text-4xl font-extrabold text-[#001f3d] mb-4">
+          <h2 className="text-4xl font-extrabold text-[#001f3d] mb-4 transition-all duration-300 hover:text-[#00457c]">
             {user.name}
           </h2>
-          <div className="space-y-6">
-            <div>
-              <p className="text-xl font-medium text-[#003366]">Email:</p>
-              <p className="text-md text-[#4b7db3] border-2 border-[#001f3d] rounded-md px-4 py-2">
+          <div className="space-y-6 w-full">
+            {/* Email */}
+            <div className="transition-all duration-300">
+              <p className="text-lg font-semibold text-[#003366] transition-all duration-300">
+                Email:
+              </p>
+              <p className="text-md text-gray-700 border-2 border-[#001f3d] rounded-md px-4 py-2 transition-all duration-300 hover:bg-gray-100 hover:text-[#003366]">
                 {user.email}
               </p>
             </div>
-            <div>
-              <p className="text-xl font-medium text-[#003366]">Phone:</p>
-              <p className="text-md text-[#4b7db3] border-2 border-[#001f3d] rounded-md px-4 py-2">
+
+            {/* Phone */}
+            <div className="transition-all duration-300">
+              <p className="text-lg font-semibold text-[#003366] transition-all duration-300">
+                Phone:
+              </p>
+              <p className="text-md text-gray-700 border-2 border-[#001f3d] rounded-md px-4 py-2 transition-all duration-300 hover:bg-gray-100 hover:text-[#003366]">
                 {user.phone}
               </p>
             </div>
-            <div>
-              <p className="text-xl font-medium text-[#003366]">Address:</p>
-              <p className="text-md text-[#4b7db3] border-2 border-[#001f3d] rounded-md px-4 py-2">
+
+            {/* Address */}
+            <div className="transition-all duration-300">
+              <p className="text-lg font-semibold text-[#003366] transition-all duration-300">
+                Address:
+              </p>
+              <p className="text-md text-gray-700 border-2 border-[#001f3d] rounded-md px-4 py-2 transition-all duration-300 hover:bg-gray-100 hover:text-[#003366]">
                 {user.address}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Edit Profile Button */}
         <div className="mt-8 text-center">
           <button
             onClick={() => alert("Edit Profile")}
-            className="w-full bg-[#001f3d] text-white py-3 rounded-lg font-semibold hover:bg-[#003366] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#001f3d] transform transition-all duration-300 hover:scale-[1.02]"
+            className="w-full bg-[#001f3d] text-white py-3 rounded-lg font-semibold transform transition-all duration-300 hover:bg-[#00457c] hover:scale-105"
           >
             Edit Profile
           </button>

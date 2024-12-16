@@ -16,7 +16,7 @@ function DoctorDashboard() {
     if (currentUser) {
       setUser(currentUser); // Set the current user
     } else {
-      router.push("login"); // Redirect to login if no user is signed in
+      router.push("/pages/login"); // Redirect to login if no user is signed in
     }
     setLoading(false);
   }, [auth, router]);
@@ -64,12 +64,6 @@ function DoctorDashboard() {
             className="w-full px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
           >
             Profile
-          </button>
-          <button
-            onClick={() => router.push("/pages/add_appointment")}
-            className="w-full px-6 py-3 bg-purple-600 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition"
-          >
-            Add Appointment
           </button>
           <button
             onClick={() => router.push("/pages/check_appointment")}

@@ -94,6 +94,7 @@ function RegisterPharmacist() {
         {
           id: newId, // Use the same manually assigned ID
           type: "pharmacist",
+          email: formData.email
         },
       ]);
 

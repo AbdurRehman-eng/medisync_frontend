@@ -14,7 +14,7 @@ function Nav() {
             <div className="flex justify-center gap-x-[2vh] items-center mx-[2vh]">
                 <SearchExtend />
                 <Button text="Login" onclick={()=>{router.push("/pages/login")}}/>
-                <Button text="Signup" onclick={()=>{router.push("/pages/signup")}}/>
+                <Button text="Signup" onclick={()=>{router.push("/pages/user_type")}}/>
             </div>
         </div>
     );

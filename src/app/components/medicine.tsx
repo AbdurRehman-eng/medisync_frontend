@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '@/app/supabase/supabaseclient';
@@ -15,11 +13,15 @@ interface MedicineData {
 export default function MedicineDetails() {
   const [medicine, setMedicine] = useState<MedicineData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false); // Track if we're on the client side
   const router = useRouter();
   const { id } = router.query; // Get medicine ID from the query parameters
-  const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Fetch medicine details from Supabase
+  useEffect(() => {
+    // Set isClient to true after the component is mounted on the client side
+    setIsClient(true);
+  }, []);
+
   useEffect(() => {
     if (id) {
       const fetchMedicine = async () => {
@@ -44,46 +46,9 @@ export default function MedicineDetails() {
     }
   }, [id]);
 
-  // Load Google Maps API Script
-  useEffect(() => {
-    const loadGoogleMaps = () => {
-      if (typeof window !== 'undefined' && !mapLoaded) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        document.body.appendChild(script);
-        setMapLoaded(true);
-      }
-    };
-
-    window.initMap = () => {
-      const map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
-        center: { lat: 37.7749, lng: -122.4194 }, // Default to San Francisco
-        zoom: 12,
-      });
-
-      const service = new google.maps.places.PlacesService(map);
-      const request = {
-        query: 'pharmacy',
-        fields: ['name', 'geometry'],
-      };
-
-      service.textSearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          results.forEach((place) => {
-            const marker = new google.maps.Marker({
-              position: place.geometry.location,
-              map: map,
-              title: place.name,
-            });
-          });
-        }
-      });
-    };
-
-    loadGoogleMaps();
-  }, [mapLoaded]);
+  if (!isClient) {
+    return <div>Loading...</div>; // Show a loading message until the component is mounted on the client
+  }
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
@@ -109,12 +74,6 @@ export default function MedicineDetails() {
           </p>
         </div>
       )}
-
-      {/* Google Maps */}
-      <div style={{ marginTop: '20px' }}>
-        <h2>Nearest Pharmacies</h2>
-        <div id="map" style={{ width: '100%', height: '400px', borderRadius: '10px' }}></div>
-      </div>
     </div>
   );
 }

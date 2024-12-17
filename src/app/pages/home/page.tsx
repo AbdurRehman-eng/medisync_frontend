@@ -5,7 +5,7 @@ import Footer from "@/app/components/footer";
 
 function HomeScreen() {
     return (
-        <div className="min-h-screen w-[100vw] bg-mainBg overflow-x-hidden">
+        <div className="min-h-screen w-[100vw] overflow-x-hidden bg-mainBg">
             {/* Navigation Bar */}
             <Nav />
 

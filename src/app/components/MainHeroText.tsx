@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const HeroTextArea = () => {
   return (
-    <div className="relative min-h-[60vh] flex items-center justify-center z-2">
+    <div className="relative min-h-[60vh] flex items-center justify-center z-2 w-[100vw]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -33,4 +33,4 @@ const HeroTextArea = () => {
   );
 };
 
-export default HeroTextArea;import React from "react";
+export default HeroTextArea;

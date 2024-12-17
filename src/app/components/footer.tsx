@@ -11,7 +11,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className=" bg-gradient-to-t from-[#333333] to-[#414141] text-white pt-12 pb-4 px-4 sm:px-6 lg:px-8 overflow-hidden mt-96">
+    <footer className=" bg-gradient-to-t from-[#212121] to-[#141313] text-white pt-12 pb-4 px-4 sm:px-6 lg:px-8 overflow-hidden mt-96">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Description Section */}
@@ -58,7 +58,7 @@ const Footer = () => {
               <div className="flex items-center space-x-3">
                 <FaEnvelope className="h-5 w-5 text-gray-400" />
                 <a
-                  href="mailto:info@hostelfinder.com"
+                  href="mailto:info@medisync.com"
                   className="text-gray-300 hover:text-white transition-colors duration-200"
                 >
                   Medisync@gmail.com
@@ -68,16 +68,16 @@ const Footer = () => {
                 <FaPhoneAlt className="h-5 w-5 text-gray-400" />
                 <div className="space-y-1">
                   <a
-                    href="tel:+1-234-567-8900"
+                    href="tel:+923171748810"
                     className="block text-gray-300 hover:text-white transition-colors duration-200"
                   >
-                    +1 (234) 567-8900
+                    +923171748810
                   </a>
                   <a
-                    href="tel:+1-234-567-8901"
+                    href="tel:+92-300-0839301"
                     className="block text-gray-300 hover:text-white transition-colors duration-200"
                   >
-                    +1 (234) 567-8901
+                    +923000839301
                   </a>
                 </div>
               </div>
@@ -87,7 +87,7 @@ const Footer = () => {
 
         <div className="mt-4 pt-4 border-t border-[#4e5529]">
           <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} HostelFinder. All rights reserved.
+            © {new Date().getFullYear()} MediSync. All rights reserved.
           </p>
         </div>
       </div>

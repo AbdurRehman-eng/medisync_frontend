@@ -1,6 +1,7 @@
 'use client';
-import { useState, ChangeEvent, MouseEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/app/supabase/supabaseclient';
+import { useUserContext } from '@/app/context/UserContext';
 
 interface Appointment {
   id: number;
@@ -11,51 +12,61 @@ interface Appointment {
 }
 
 export default function CheckAppointment() {
-  const [doctorId, setDoctorId] = useState<string>('');
+  const { userId } = useUserContext();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
 
-  // Handle input changes for Doctor ID
-  const handleDoctorIdChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setDoctorId(e.target.value);
-  };
+  // Fetch the doctor ID and appointments on component mount
+  useEffect(() => {
+    const fetchDoctorAppointments = async () => {
+      setLoading(true);
+      setError(null);
 
-  // Fetch appointments for a specific doctor
-  const handleFetchAppointments = async () => {
-    if (!doctorId) {
-      setError('Please enter a Doctor ID');
-      return;
-    }
+      try {
+        // Fetch doctor ID from the user table using userId
+        const { data: userData, error: userError } = await supabase
+          .from('user')
+          .select('id')
+          .eq('user_id', userId)
+          .single();
 
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error } = await supabase
-        .from('appointment')
-        .select('*')
-        .eq('doctor_id', doctorId); // Fetch appointments for the given doctor_id
+        if (userError || !userData) {
+          setError('Error fetching user data.');
+          return;
+        }
 
-      if (error) {
-        setError(`Error fetching appointments: ${error.message}`);
-      } else {
-        setAppointments(data || []);
+        const doctorId = userData.id;
+
+        // Fetch appointments for the doctor
+        const { data: appointmentsData, error: appointmentsError } = await supabase
+          .from('appointment')
+          .select('*')
+          .eq('doctor_id', doctorId);
+
+        if (appointmentsError) {
+          setError(`Error fetching appointments: ${appointmentsError.message}`);
+        } else {
+          setAppointments(appointmentsData || []);
+        }
+      } catch (err) {
+        setError('An unexpected error occurred while fetching data.');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError('An unexpected error occurred while fetching appointments.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchDoctorAppointments();
+  }, [userId]);
 
   // Handle changes in the appointment data (e.g., confirmation checkbox)
-  const handleAppointmentChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    const { name, value, type, checked } = e.target;
+  const handleAppointmentChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const { name, checked } = e.target;
     const updatedAppointments = [...appointments];
     updatedAppointments[index] = {
       ...updatedAppointments[index],
-      [name]: type === 'checkbox' ? checked : value
+      [name]: checked
     };
     setAppointments(updatedAppointments);
   };
@@ -73,7 +84,7 @@ export default function CheckAppointment() {
       // Update each appointment in the database
       const { error } = await supabase
         .from('appointment')
-        .upsert(updates, { onConflict: 'id' }); // Upsert to update existing records or insert new ones
+        .upsert(updates, { onConflict: 'id' });
 
       if (error) {
         setError(`Error committing changes: ${error.message}`);
@@ -96,26 +107,6 @@ export default function CheckAppointment() {
 
       {/* Display success message */}
       {successMessage && <div className="text-green-600 mb-4">{successMessage}</div>}
-
-      {/* Input for Doctor ID */}
-      <div className="mb-6">
-        <label className="block text-white font-medium">Doctor ID:</label>
-        <div className="flex items-center space-x-4">
-          <input
-            type="number"
-            value={doctorId}
-            onChange={handleDoctorIdChange}
-            placeholder="Enter Doctor ID"
-            className="p-2 rounded-md border border-gray-300"
-          />
-          <button
-            onClick={handleFetchAppointments}
-            className="px-4 py-2 bg-[#173b2b] text-white rounded-md hover:bg-[#133224] transform transition-all hover:scale-105"
-          >
-            Fetch Appointments
-          </button>
-        </div>
-      </div>
 
       {/* Display appointments table */}
       {loading && <div className="text-white">Loading appointments...</div>}

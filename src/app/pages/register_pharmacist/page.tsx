@@ -83,10 +83,14 @@ export default function RegisterPharmacist() {
         return;
       }
 
-      const { error: userInsertError } = await supabase.from("user").insert([{
-        id: newId,
-        type: "pharmacist",
-      }]);
+      // Step 3: Insert into the user table with type "pharmacist"
+      const { error: userInsertError } = await supabase.from("user").insert([
+        {
+          id: newId, // Use the same manually assigned ID
+          type: "pharmacist",
+          email: formData.email
+        },
+      ]);
 
       if (userInsertError) {
         setError(`Error adding user: ${userInsertError.message}`);

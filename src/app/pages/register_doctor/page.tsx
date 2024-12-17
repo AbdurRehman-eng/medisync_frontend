@@ -66,7 +66,21 @@ export default function RegisterDoctor() {
         newDoctorId = doctorMaxData[0].id + 1; // Increment the max id
       }
 
-      // Step 2: Insert the doctor into the doctor table with the calculated ID
+      // Step 2: Fetch the maximum `user_id` from the user table
+      const { data: userMaxData, error: userMaxError } = await supabase
+        .from('user')
+        .select('user_id')
+        .order('user_id', { ascending: false })
+        .limit(1);
+
+      if (userMaxError) throw new Error(userMaxError.message);
+
+      let newUserId = 1; // Default to 1 if no user exists
+      if (userMaxData && userMaxData.length > 0) {
+        newUserId = userMaxData[0].user_id + 1; // Increment the max user_id
+      }
+
+      // Step 3: Insert the doctor into the doctor table with the calculated ID
       const { data: doctorData, error: doctorError } = await supabase
         .from('doctor')
         .insert([{
@@ -83,19 +97,21 @@ export default function RegisterDoctor() {
 
       if (doctorError) throw new Error(doctorError.message);
 
-      // Step 3: Insert the user into the user table
+      // Step 4: Insert the user into the user table with the calculated user_id
       const { error: userInsertError } = await supabase
         .from('user')
-        .insert([{
-          user_id: newDoctorId, // Use the same ID
-          id: newDoctorId,
-          type: 'doctor',
-          email: formData.email
-        }]);
+        .insert([
+          {
+            user_id: newUserId, // Use the calculated user ID
+            id: newDoctorId, // Associate this user with the doctor ID
+            type: 'doctor',
+            email: formData.email,
+          },
+        ]);
 
       if (userInsertError) throw new Error(userInsertError.message);
 
-      // Step 4: Set success message and reset form
+      // Step 5: Set success message and reset form
       setSuccessMessage('Doctor registered successfully!');
       setError('');
 

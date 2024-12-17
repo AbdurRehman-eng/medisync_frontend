@@ -4,16 +4,20 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/firebase";
+import { useUserContext } from "@/app/context/UserContext"; // Import the custom hook
+import { supabase } from "@/app/supabase/supabaseclient"; // Import the Supabase client
 
 const LoginSignup = () => {
+  const { setUserId } = useUserContext(); // Access setUserId function
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
-
   const commonDomains = ["@gmail.com", "@yahoo.com", "@outlook.com", "@hotmail.com"];
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const router = useRouter();
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -41,9 +45,7 @@ const LoginSignup = () => {
     if (!value) {
       setErrors((prev) => ({ ...prev, password: "Password is required" }));
     } else if (value.length < 8) {
-      setErrors((prev) => (
-        { ...prev, password: "Password must be at least 8 characters" }
-      ));
+      setErrors((prev) => ({ ...prev, password: "Password must be at least 8 characters" }));
     } else {
       setErrors((prev) => ({ ...prev, password: "" }));
     }
@@ -54,8 +56,33 @@ const LoginSignup = () => {
     if (!errors.email && !errors.password && email && password) {
       setLoading(true);
       try {
+        // First, check if the email exists in Supabase and get the user_id
+        const { data, error } = await supabase
+          .from('user') // 'user' is the name of your Supabase table
+          .select('user_id')
+          .eq('email', email)
+          .single();
+
+        if (error) {
+          setLoading(false);
+          console.error("Error fetching user from Supabase:", error.message);
+          setErrors((prev) => ({
+            ...prev,
+            email: "User not found in the database"
+          }));
+          return;
+        }
+
+        const userId = data?.user_id;
+        
+        // Authenticate with Firebase if email exists
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+
+        // Update the global state
+        setUserId(userId);
+
+        // Redirect to dashboard or any other page
         router.push("/pages/dashboard");
       } catch (error: any) {
         setLoading(false);
@@ -70,15 +97,12 @@ const LoginSignup = () => {
       }
     }
   };
-  
 
-  const applySuggestion = (domain : string) => {
+  const applySuggestion = (domain: string) => {
     setEmail(email.split("@")[0] + domain);
     setShowSuggestions(false);
     setErrors((prev) => ({ ...prev, email: "" }));
   };
-
-  const router = useRouter();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">

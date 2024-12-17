@@ -39,6 +39,33 @@ function DoctorDashboard() {
     );
   }
 
+  const cards = [
+    {
+      title: "Search Medicine",
+      description: "Find the medicines you need in our database.",
+      buttonText: "Search Now",
+      route: "/pages/search",
+    },
+    {
+      title: "Profile",
+      description: "View and edit your personal details.",
+      buttonText: "View Profile",
+      route: "/pages/profile",
+    },
+    {
+      title: "Add Appointment",
+      description: "Add new patient appointments to your schedule.",
+      buttonText: "Add Appointment",
+      route: "/pages/add_appointment",
+    },
+    {
+      title: "Check Appointments",
+      description: "View your upcoming appointments and schedules.",
+      buttonText: "Check Appointments",
+      route: "/pages/check_appointment",
+    },
+  ];
+
   return (
     <div
       className="min-h-screen flex flex-col items-center py-10"

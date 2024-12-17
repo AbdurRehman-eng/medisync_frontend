@@ -54,7 +54,7 @@ function RegisterPatient() {
         .limit(1);
   
       if (maxUserIdError) {
-        setError(Error retrieving max user_id: ${maxUserIdError.message});
+        setError("Error retrieving max user_id: ${maxUserIdError.message}");
         return;
       }
   

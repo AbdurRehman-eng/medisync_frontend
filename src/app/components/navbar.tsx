@@ -28,7 +28,7 @@ function Nav() {
 
 <Button
    text="Sign Up"
-   onclick={() => { router.push("/pages/signup"); }}
+   onclick={() => { router.push("/pages/user_type"); }}
    className="bg-[#D1D1D1] hover:bg-[#A0A0A0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a6ed7] transform transition-all duration-300 hover:scale-[1.02] py-3 px-6 rounded-lg font-semibold"
    
  />

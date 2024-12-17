@@ -3,7 +3,7 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/app/supabase/supabaseclient';
 import { useRouter } from 'next/navigation';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/app/firebase/firebase'; // Import your Firebase app configuration
 
 interface DoctorData {
@@ -52,6 +52,10 @@ export default function RegisterDoctor() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
+      // Send verification email
+      await sendEmailVerification(user);
+      setSuccessMessage('Registration successful! Please verify your email.');
+
       // Step 1: Fetch the maximum `id` from the doctor table
       const { data: doctorMaxData, error: doctorMaxError } = await supabase
         .from('doctor')
@@ -83,17 +87,15 @@ export default function RegisterDoctor() {
       // Step 3: Insert the doctor into the doctor table with the calculated ID
       const { data: doctorData, error: doctorError } = await supabase
         .from('doctor')
-        .insert([
-          {
-            id: newDoctorId, // Use the calculated doctor ID
-            name: formData.name,
-            clinic_location: formData.clinic_location,
-            contact: formData.contact,
-            specialization: formData.specialization,
-            email: formData.email,
-            password: formData.password, // Store the password
-          },
-        ])
+        .insert([{
+          id: newDoctorId, // Use the calculated doctor ID
+          name: formData.name,
+          clinic_location: formData.clinic_location,
+          contact: formData.contact,
+          specialization: formData.specialization,
+          email: formData.email,
+          password: formData.password, // Store the password
+        }])
         .select('*')
         .single();
 
@@ -102,19 +104,17 @@ export default function RegisterDoctor() {
       // Step 4: Insert the user into the user table with the calculated user_id
       const { error: userInsertError } = await supabase
         .from('user')
-        .insert([
-          {
-            user_id: newUserId, // Use the calculated user ID
-            id: newDoctorId, // Associate this user with the doctor ID
-            type: 'doctor',
-            email: formData.email,
-          },
-        ]);
+        .insert([{
+          user_id: newUserId, // Use the calculated user ID
+          id: newDoctorId, // Associate this user with the doctor ID
+          type: 'doctor',
+          email: formData.email,
+        }]);
 
       if (userInsertError) throw new Error(userInsertError.message);
 
       // Step 5: Set success message and reset form
-      setSuccessMessage('Doctor registered successfully!');
+      setSuccessMessage('Doctor registered successfully! Please check your email for verification.');
       setError('');
 
       // Reset form

@@ -3,7 +3,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/app/firebase/firebase";  // Import Firebase auth configuration
 
 function RegisterPatient() {
@@ -81,17 +81,15 @@ function RegisterPatient() {
       // Step 3: Insert into the patient table with the new patient_id
       const { data: patientData, error: patientError } = await supabase
         .from("patient")
-        .insert([
-          {
-            id: newPatientId, // Use the new patient_id
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            address: formData.address,
-            contact: formData.contact,
-            email: formData.email,
-            password: formData.password,
-          },
-        ]);
+        .insert([{
+          id: newPatientId, // Use the new patient_id
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          address: formData.address,
+          contact: formData.contact,
+          email: formData.email,
+          password: formData.password,
+        }]);
   
       if (patientError) {
         setError(`Error adding patient: ${patientError.message}`);
@@ -99,29 +97,31 @@ function RegisterPatient() {
       }
   
       // Step 4: Insert into the user table with the new user_id and type "patient"
-      const { error: userInsertError } = await supabase.from("user").insert([
-        {
-          user_id: newUserId, // Use the new user_id
-          type: "patient", // Set type to "patient"
-          email: formData.email, // Include email from the form
-          id: newPatientId, // Store the new patient_id in the user table
-        },
-      ]);
+      const { error: userInsertError } = await supabase.from("user").insert([{
+        user_id: newUserId, // Use the new user_id
+        type: "patient", // Set type to "patient"
+        email: formData.email, // Include email from the form
+        id: newPatientId, // Store the new patient_id in the user table
+      }]);
   
       if (userInsertError) {
         setError(`Error adding user: ${userInsertError.message}`);
         return;
       }
   
-      // Firebase Registration (Example)
+      // Firebase Registration
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       if (userCredential.user) {
         // Handle successful user creation with Firebase
         console.log("Firebase User created:", userCredential.user);
+
+        // Send verification email
+        await sendEmailVerification(userCredential.user);
+        console.log("Verification email sent to:", formData.email);
       }
-  
+
       // Success message
-      setSuccessMessage("Patient registered successfully!");
+      setSuccessMessage("Patient registered successfully! Please check your email for verification.");
       setError(null);
   
       // Reset form
@@ -134,14 +134,14 @@ function RegisterPatient() {
         password: "",
       });
   
-      // Redirect to login page
+      // Redirect to login page after success
       router.push("/pages/login");
     } catch (err: any) {
       // Handle errors thrown during the process
       setError(`An error occurred: ${err.message}`);
     }
-  };  
-  
+  };
+
   return (
     <div
       style={{

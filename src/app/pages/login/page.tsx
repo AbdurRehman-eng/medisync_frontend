@@ -62,7 +62,7 @@ const LoginSignup = () => {
           .select('user_id')
           .eq('email', email)
           .single();
-
+  
         if (error) {
           setLoading(false);
           console.error("Error fetching user from Supabase:", error.message);
@@ -72,16 +72,26 @@ const LoginSignup = () => {
           }));
           return;
         }
-
+  
         const userId = data?.user_id;
-        
+  
         // Authenticate with Firebase if email exists
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-
+  
+        // Check if email is verified
+        if (!user.emailVerified) {
+          setLoading(false);
+          setErrors((prev) => ({
+            ...prev,
+            email: "Please verify your email before logging in."
+          }));
+          return;
+        }
+  
         // Update the global state
         setUserId(userId);
-
+  
         // Redirect to dashboard or any other page
         router.push("/pages/dashboard");
       } catch (error: any) {
@@ -97,6 +107,7 @@ const LoginSignup = () => {
       }
     }
   };
+  
 
   const applySuggestion = (domain: string) => {
     setEmail(email.split("@")[0] + domain);

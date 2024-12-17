@@ -3,7 +3,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/app/firebase/firebase";
 
 function RegisterPharmacist() {
@@ -55,6 +55,9 @@ function RegisterPharmacist() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
+      // Send verification email
+      await sendEmailVerification(firebaseUser);
+      
       // Step 1: Get the highest ID from the pharmacist table
       const { data: maxIdData, error: maxIdError } = await supabase
         .from("pharmacist")
@@ -118,7 +121,7 @@ function RegisterPharmacist() {
         return;
       }
 
-      setSuccessMessage("Pharmacist registered successfully!");
+      setSuccessMessage("Pharmacist registered successfully! Please check your email for verification.");
       setError(null);
 
       // Reset form

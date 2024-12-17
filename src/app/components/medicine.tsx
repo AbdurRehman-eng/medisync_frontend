@@ -1,79 +1,42 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { supabase } from '@/app/supabase/supabaseclient';
+import { useMedicineContext } from "@/app/context/MedicineContext"; // Import context hook
+import { useEffect, useState } from "react";
+import { supabase } from "@/app/supabase/supabaseclient"; // Assuming you have Supabase client set up
 
-interface MedicineData {
-  id: number;
-  name: string;
-  description: string;
-  chemical_formula: string;
-  image_url: string;
-}
-
-export default function MedicineDetails() {
-  const [medicine, setMedicine] = useState<MedicineData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false); // Track if we're on the client side
-  const router = useRouter();
-  const { id } = router.query; // Get medicine ID from the query parameters
+const MedicineDetails = () => {
+  const { medicineId } = useMedicineContext(); // Access the medicineId from context
+  const [medicineDetails, setMedicineDetails] = useState<any>(null);
 
   useEffect(() => {
-    // Set isClient to true after the component is mounted on the client side
-    setIsClient(true);
-  }, []);
+    const fetchMedicineDetails = async () => {
+      if (!medicineId) return;
 
-  useEffect(() => {
-    if (id) {
-      const fetchMedicine = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('medicine')
-            .select('*')
-            .eq('id', id)
-            .single();
+      const { data, error } = await supabase
+        .from("main") // Assuming 'main' is the table name
+        .select("*")
+        .eq("id", medicineId)
+        .single();
 
-          if (error) {
-            setError('Failed to load medicine details');
-          } else {
-            setMedicine(data);
-          }
-        } catch (err) {
-          setError('An unexpected error occurred.');
-        }
-      };
+      if (error) {
+        console.error("Error fetching medicine details:", error.message);
+      } else {
+        setMedicineDetails(data);
+      }
+    };
 
-      fetchMedicine();
-    }
-  }, [id]);
+    fetchMedicineDetails();
+  }, [medicineId]);
 
-  if (!isClient) {
-    return <div>Loading...</div>; // Show a loading message until the component is mounted on the client
-  }
+  if (!medicineDetails) return <p>Loading...</p>;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center' }}>Medicine Details</h1>
-
-      {/* Error Message */}
-      {error && <div style={{ color: 'red', textAlign: 'center', marginBottom: '10px' }}>{error}</div>}
-
-      {/* Medicine Information */}
-      {medicine && (
-        <div>
-          <h2>{medicine.name}</h2>
-          <img
-            src={medicine.image_url}
-            alt={`${medicine.name} image`}
-            style={{ width: '100%', height: 'auto', marginBottom: '20px', borderRadius: '10px' }}
-          />
-          <p>
-            <strong>Description:</strong> {medicine.description}
-          </p>
-          <p>
-            <strong>Chemical Formula:</strong> {medicine.chemical_formula}
-          </p>
-        </div>
-      )}
+    <div>
+      <h1>{medicineDetails.medicine_name}</h1>
+      <p><strong>Ingredients:</strong> {medicineDetails.ingredients}</p>
+      <p><strong>Availability:</strong> {medicineDetails.availability}</p>
+      <p><strong>Address:</strong> {medicineDetails.address}</p>
+      <p><strong>Pharmacy Name:</strong> {medicineDetails.pharmacy_name}</p>
     </div>
   );
-}
+};
+
+export default MedicineDetails;

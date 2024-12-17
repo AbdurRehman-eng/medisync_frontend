@@ -27,9 +27,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userType, setUserTypeState] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch the userId from sessionStorage when the component mounts
-    const storedUserId = sessionStorage.getItem("user_id");
-    const storedUserType = sessionStorage.getItem("user_type");
+    // Fetch the userId and userType from localStorage when the component mounts
+    const storedUserId = localStorage.getItem("user_id");
+    const storedUserType = localStorage.getItem("user_type");
+
     if (storedUserId) {
       setUserIdState(storedUserId);
     }
@@ -41,12 +42,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   // Set userId and userType and update the state
   const setUserId = (userId: string) => {
     setUserIdState(userId);
-    sessionStorage.setItem("user_id", userId); // Save to sessionStorage
+    localStorage.setItem("user_id", userId); // Save to localStorage
   };
 
   const setUserType = (userType: string) => {
     setUserTypeState(userType);
-    sessionStorage.setItem("user_type", userType); // Save to sessionStorage
+    localStorage.setItem("user_type", userType); // Save to localStorage
   };
 
   return (

@@ -8,7 +8,6 @@ interface Medicine {
   id: number;
   medicine_name: string;
   ingredients: string;
-  address: string;
   availability: boolean;
 }
 
@@ -60,7 +59,7 @@ export default function SearchByPharmacy() {
       // Step 3: Fetch medicines from the 'main' table based on the pharmacy name
       const { data: fetchedData, error: fetchError } = await supabase
         .from('main')
-        .select('id, medicine_name, ingredients, address, availability')
+        .select('id, medicine_name, ingredients, availability')
         .ilike('pharmacy_name', `%${pharmacyName}%`);
 
       if (fetchError) {
@@ -152,7 +151,6 @@ export default function SearchByPharmacy() {
                 <tr key={item.id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 border">{item.medicine_name}</td>
                   <td className="px-4 py-2 border">{item.ingredients}</td>
-                  <td className="px-4 py-2 border">{item.address}</td>
                   <td className="px-4 py-2 border text-center">
                     <input
                       type="checkbox"

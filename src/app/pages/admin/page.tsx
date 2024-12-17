@@ -3,7 +3,6 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/app/supabase/supabaseclient';
 
 interface MedicineData {
-  id: number | '';
   medicine_name: string;
   ingredients: string;
   pharmacy_name: string;
@@ -13,7 +12,6 @@ interface MedicineData {
 
 export default function Inpu() {
   const [formData, setFormData] = useState<MedicineData>({
-    id: '',
     medicine_name: '',
     ingredients: '',
     pharmacy_name: '',
@@ -29,7 +27,7 @@ export default function Inpu() {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -38,31 +36,42 @@ export default function Inpu() {
     e.preventDefault();
 
     // Ensure form data is valid
-    if (!formData.id || !formData.medicine_name || !formData.ingredients || !formData.pharmacy_name || !formData.address) {
+    if (!formData.medicine_name || !formData.ingredients || !formData.pharmacy_name || !formData.address) {
       setError('Please fill in all fields');
       return;
     }
 
-    const { data: newData, error } = await supabase
-      .from('main')
-      .insert([formData]);
+    try {
+      // Get the maximum id from the database
+      const { data: maxIdData, error: maxIdError } = await supabase
+        .from('main')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1);
 
-    if (error) {
-      setError(`Error: ${error.message}`);
-      setSuccessMessage('');
-    } else {
+      if (maxIdError) throw new Error('Error fetching max ID');
+
+      const nextId = (maxIdData?.[0]?.id || 0) + 1;
+
+      // Insert data with the new ID
+      const { error: insertError } = await supabase.from('main').insert([{ id: nextId, ...formData }]);
+
+      if (insertError) throw new Error(insertError.message);
+
       setSuccessMessage('Data added successfully!');
       setError('');
 
       // Reset form fields
       setFormData({
-        id: '',
         medicine_name: '',
         ingredients: '',
         pharmacy_name: '',
         address: '',
         availability: false,
       });
+    } catch (err: any) {
+      setError(`Error: ${err.message}`);
+      setSuccessMessage('');
     }
   };
 
@@ -78,18 +87,6 @@ export default function Inpu() {
         {successMessage && <div className="text-green-600 mb-4 text-center">{successMessage}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">ID:</label>
-            <input
-              type="number"
-              name="id"
-              value={formData.id}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Enter medicine ID"
-            />
-          </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1">Medicine Name:</label>
             <input

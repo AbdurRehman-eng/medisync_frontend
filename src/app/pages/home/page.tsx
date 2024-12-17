@@ -21,12 +21,6 @@ function HomeScreen() {
             <HeroTextArea/>
             <Footer/>
         </div>
-            <div className="bg-transparent h-20 w-[100vw]"></div>
-            <HeroTextArea />
-            <MedicineCard medicine={Paracetamol} />
-            <MedicineCardContainer></MedicineCardContainer>
-            <Footer />
-        </div>
     );
 }
 

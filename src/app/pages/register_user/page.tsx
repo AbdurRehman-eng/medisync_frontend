@@ -70,7 +70,7 @@ function RegisterPatient() {
         .limit(1);
   
       if (maxPatientIdError) {
-        setError(Error retrieving max patient_id: ${maxPatientIdError.message});
+        setError("Error retrieving max patient_id: ${maxPatientIdError.message}");
         return;
       }
   
@@ -94,7 +94,7 @@ function RegisterPatient() {
         ]);
   
       if (patientError) {
-        setError(Error adding patient: ${patientError.message});
+        setError("Error adding patient: ${patientError.message}");
         return;
       }
   
@@ -109,7 +109,7 @@ function RegisterPatient() {
       ]);
   
       if (userInsertError) {
-        setError(Error adding user: ${userInsertError.message});
+        setError("Error adding user: ${userInsertError.message}");
         return;
       }
   
@@ -138,7 +138,7 @@ function RegisterPatient() {
       router.push("/pages/login");
     } catch (err: any) {
       // Handle errors thrown during the process
-      setError(An error occurred: ${err.message});
+      setError("An error occurred: ${err.message}");
     }
   };  
   

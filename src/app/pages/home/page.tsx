@@ -1,6 +1,6 @@
 "use client";
+
 import Nav from "../../components/navbar";
-import { useRouter } from "next/router";
 import HeroTextArea from "../../components/MainHeroText";
 import Footer from "@/app/components/footer";
 import MedicineCard from "@/app/components/ui/card1";
@@ -16,15 +16,21 @@ function HomeScreen() {
 
     return (
         <div className="h-[100vh] w-[100vw] bg-[#fefdf8] overflow-x-hidden">
+            {/* Navbar */}
             <Nav />
-            <div className="bg-transparent h-20 w-[100w]"></div>
-            <HeroTextArea/>
-            <Footer/>
-        </div>
-            <div className="bg-transparent h-20 w-[100vw]"></div>
+
+            {/* Hero Section */}
+            <div className="bg-transparent h-20 w-full"></div>
             <HeroTextArea />
+
+            {/* Medicine Card */}
+            <div className="bg-transparent h-20 w-full"></div>
             <MedicineCard medicine={Paracetamol} />
-            <MedicineCardContainer></MedicineCardContainer>
+
+            {/* Medicine Card Grid */}
+            <MedicineCardContainer />
+
+            {/* Footer */}
             <Footer />
         </div>
     );

@@ -5,6 +5,7 @@ import { supabase } from "@/app/supabase/supabaseclient";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/firebase";  // Import Firebase auth configuration
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function RegisterPatient() {
   const [formData, setFormData] = useState({

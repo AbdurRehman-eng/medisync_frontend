@@ -40,50 +40,74 @@ function UserDashboard() {
     );
   }
 
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-10 rounded-xl shadow-2xl max-w-lg w-full">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome to the Dashboard
-        </h1>
-        {user && (
-          <p className="text-center text-lg text-gray-600 mb-8">
-            Signed in as: <span className="font-semibold">{user.email}</span>
-          </p>
-        )}
+  const cards = [
+    {
+      title: "Go to Profile",
+      description: "View and edit your personal information.",
+      buttonText: "Go to Profile",
+      route: "/pages/profile",
+    },
+    {
+      title: "Add Appointment",
+      description: "Schedule an appointment.",
+      buttonText: "Add Appointment",
+      route: "/pages/add_appointment",
+    },
+    {
+      title: "Appointment Status",
+      description: "Check the status of your appointments.",
+      buttonText: "View Status",
+      route: "/pages/appointment_status",
+    },
+    {
+      title: "Go to Search",
+      description: "Search for medical information.",
+      buttonText: "Search Now",
+      route: "/pages/search",
+    },
+  ];
 
-        <div className="space-y-4">
-          <button
-            onClick={() => router.push("/pages/profile")}
-            className="w-full px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition"
-          >
-            Go to Profile
-          </button>
-          {/* Replaced "Check Appointments" with "Add Appointment" */}
-          <button
-            onClick={() => router.push("/pages/add_appointment")}
-            className="w-full px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
-          >
-            Add Appointment
-          </button>
-          <button
-            onClick={() => router.push("/pages/appointment_status")}
-            className="w-full px-6 py-3 bg-purple-600 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition"
-          >
-            Appointment Status
-          </button>
-          <button
-            onClick={() => router.push("/pages/search")}
-            className="w-full px-6 py-3 bg-indigo-600 text-white text-lg font-semibold rounded-lg hover:bg-indigo-700 transition"
-          >
-            Go to Search
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="w-full px-6 py-3 bg-red-600 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition"
-          >
-            Sign Out
-          </button>
+  return (
+    <div className="min-h-screen flex flex-col items-center py-10 bg-mainBg">
+      {/* Header */}
+      <div className="h-20 w-full bg-[#213555] fixed top-0 left-0 flex justify-between items-center px-6 z-[1000]">
+        <h1 className="text-white text-3xl font-extrabold">User Dashboard</h1>
+
+        {/* Sign-Out Button */}
+        <button
+          onClick={handleSignOut}
+          className="bg-[#ffffff] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a6ed7] transform transition-all duration-300 hover:scale-[1.02] py-2 px-4 rounded-lg font-semibold"
+        >
+          Sign Out
+        </button>
+      </div>
+
+      {/* Welcome Message */}
+      {user && (
+        <p className="text-black text-5xl font-extrabold mt-48 block bg-clip-text text-transparent bg-mainAccent">
+          Welcome, {user.email}
+        </p>
+      )}
+
+      {/* Content below the fixed header */}
+      <div className="flex-grow flex flex-col items-center justify-center w-full px-6 pt-24">
+        {/* Grid Layout for Cards (2x2 Matrix) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full">
+          {cards.map(({ title, description, buttonText, route }) => (
+            <div
+              key={title}
+              className="bg-secAccent p-6 rounded-xl shadow-xl transition transform hover:scale-[1.02]"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-[#00457c]">{title}</h2>
+              <p className="text-gray-600 mb-6">{description}</p>
+              <button
+                onClick={() => router.push(route)}
+                className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+              >
+                {buttonText}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

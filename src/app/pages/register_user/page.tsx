@@ -151,7 +151,7 @@ function RegisterPatient() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <h1 style={{ textAlign: "center", color: "#4CAF50" }}>Register Patient</h1>
+      <h1 style={{ textAlign: "center"}} className="font-extrabold text-2xl">Register Patient</h1>
 
       {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
       {successMessage && (
@@ -264,7 +264,7 @@ function RegisterPatient() {
           type="submit"
           style={{
             padding: "10px",
-            backgroundColor: "#4CAF50",
+            backgroundColor: "#213555",
             color: "white",
             border: "none",
             borderRadius: "4px",

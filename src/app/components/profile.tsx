@@ -158,7 +158,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       {/* Profile Header */}
-      <div className="w-full bg-green-600 py-6 flex justify-center">
+      <div className="w-full bg-[#213555] py-6 flex justify-center">
         <h1 className="text-white text-2xl font-semibold">User Profile</h1>
       </div>
 
@@ -169,7 +169,7 @@ const ProfilePage: React.FC = () => {
           <img
             src={userProfile.profilePicture}
             alt="Profile Picture"
-            className="w-24 h-24 rounded-full border-4 border-green-500 object-cover"
+            className="w-24 h-24 rounded-full border-4 border-[#213555] object-cover"
           />
         </div>
 
@@ -196,7 +196,7 @@ const ProfilePage: React.FC = () => {
         <div className="mt-6 flex justify-center">
           <button
             onClick={handleEditProfile}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="bg-[#213555] text-white py-2 px-4 rounded-lg shadow hover:bg-[#1a2b47] focus:outline-none focus:ring-2 focus:ring-[#283e60]"
           >
             Edit Profile
           </button>

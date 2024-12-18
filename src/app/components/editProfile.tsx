@@ -157,16 +157,19 @@ const EditProfilePage: React.FC = () => {
       let tableName: string = type;
   
       // Construct the profile data to be updated
-      let profileData: any = { id, contact: phone, clinic_location: address };
+      let profileData: any;
   
       // Add additional fields based on user type
       if (type === "patient") {
+        profileData = { id, contact: phone, address: address };
         const [first_name, last_name] = name.split(" ");
         profileData = { ...profileData, first_name, last_name }; // Patient uses first_name and last_name
       } else if (type === "pharmacist") {
+        profileData = { id, contact: phone, address: address };
         profileData = { ...profileData, name, phone }; // Pharmacist uses name and phone directly
       } else if (type === "doctor") {
-        profileData = { ...profileData, name, contact: phone }; // Doctor uses name and contact
+        profileData = { id, contact: phone,clinic_location: address };
+        profileData = { ...profileData, name, clinic_location: address }; // Doctor uses name and contact
       }
   
       // Perform upsert to update the corresponding table
@@ -212,7 +215,7 @@ const EditProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       {/* Profile Header */}
-      <div className="w-full bg-green-600 py-6 flex justify-center">
+      <div className="w-full bg-[#213555] py-6 flex justify-center">
         <h1 className="text-white text-2xl font-semibold">Edit Profile</h1>
       </div>
 
@@ -223,7 +226,7 @@ const EditProfilePage: React.FC = () => {
           <img
             src={formData.profilePicture}
             alt="Profile Picture"
-            className="w-24 h-24 rounded-full border-4 border-green-500 object-cover"
+            className="w-24 h-24 rounded-full border-4 border-[#213555] object-cover"
           />
         </div>
 
@@ -270,7 +273,7 @@ const EditProfilePage: React.FC = () => {
         <div className="mt-6 flex justify-center">
           <button
             onClick={handleSave}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="bg-[#213555] text-white py-2 px-4 rounded-lg shadow hover:bg-[#1c2e4b] focus:outline-none focus:ring-2 focus:ring-[#213555]"
           >
             Save Changes
           </button>

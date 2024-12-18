@@ -136,7 +136,7 @@ export default function RegisterDoctor() {
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' }}>Register Doctor</h1>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' }} className='font-extrabold font-30'>Register Doctor</h1>
 
       {/* Display error message */}
       {error && <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>{error}</div>}
@@ -167,7 +167,7 @@ export default function RegisterDoctor() {
           type="submit"
           style={{
             padding: '10px',
-            backgroundColor: '#4CAF50',
+            backgroundColor: '#213555',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
@@ -175,8 +175,8 @@ export default function RegisterDoctor() {
             fontWeight: 'bold',
             transition: 'background-color 0.3s',
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#45a049')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#4CAF50')}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#213555')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#213555')}
         >
           Register Doctor
         </button>

@@ -141,7 +141,7 @@ function RegisterPharmacist() {
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ textAlign: "center", color: "#4CAF50" }}>Register Pharmacist</h1>
+      <h1 style={{ textAlign: "center",  }} className="text-40 font-bold text-black">Register Pharmacist</h1>
 
       {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
       {successMessage && <div style={{ color: "green", marginBottom: "10px" }}>{successMessage}</div>}
@@ -252,7 +252,7 @@ function RegisterPharmacist() {
           type="submit"
           style={{
             padding: "10px",
-            backgroundColor: "#4CAF50",
+            backgroundColor: "#213555",
             color: "white",
             border: "none",
             borderRadius: "4px",

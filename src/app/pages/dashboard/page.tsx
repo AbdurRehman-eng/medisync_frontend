@@ -4,24 +4,22 @@ import { useUserContext } from "@/app/context/UserContext";
 import UserDashboard from "@/app/components/user_dashboard";
 import DoctorDashboard from "@/app/components/doctor_dashboard";
 import PharmacistDashboard from "@/app/components/pharmacist_dashboard";
+import { createClient } from "@supabase/supabase-js";
 import { supabase } from "@/app/supabase/supabaseclient";
-import { useRouter } from "next/navigation"; // Import useRouter for redirection
+
+// Initialize Supabase clien
 
 const Dash = () => {
   const { userId, setUserId, userType, setUserType } = useUserContext();
   const [loading, setLoading] = useState(true);
-  const router = useRouter(); // Initialize useRouter
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Check if user is signed in
         if (!userId) {
-          console.error("User not signed in");
-          router.push("/login"); // Redirect to login page if not signed in
+          console.error("User ID not found in context");
+          setLoading(false);
           return;
         }
-
         const { data, error } = await supabase
           .from("user")
           .select("type")
@@ -49,7 +47,7 @@ const Dash = () => {
     if (userId) {
       fetchUserData();
     }
-  }, [userId, setUserType, router]); // Adding router to dependencies
+  }, [userId, setUserType]);
 
   if (loading) {
     return <div>Loading...</div>; // Loading state

@@ -10,17 +10,6 @@ function PharmacistDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if a user is currently signed in
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      setUser(currentUser); // Set the current user
-    } else {
-      router.push("login"); // Redirect to login if no user is signed in
-    }
-    setLoading(false);
-  }, [auth, router]);
-
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {

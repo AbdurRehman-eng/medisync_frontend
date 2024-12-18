@@ -55,7 +55,7 @@ const Dash = () => {
 
   // Render components based on userType
   return (
-    <div>
+    <div className="h-[100vh]">
       {userType === "pharmacist" && <PharmacistDashboard />}
       {userType === "doctor" && <DoctorDashboard />}
       {userType === "patient" && <UserDashboard />}

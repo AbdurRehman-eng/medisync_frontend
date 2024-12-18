@@ -62,7 +62,7 @@ function PharmacistDashboard() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-10 bg-mainBg">
+    <div className="h-full flex flex-col items-center py-10 bg-mainBg">
       {/* Header */}
       <div className="h-20 w-full bg-[#213555] fixed top-0 left-0 flex justify-between items-center px-6 z-[1000]">
         <h1 className="text-white text-3xl font-extrabold">Pharmacist Dashboard</h1>
@@ -96,7 +96,7 @@ function PharmacistDashboard() {
               <p className="text-gray-600 mb-6">{description}</p>
               <button
                 onClick={() => router.push(route)}
-                className="w-full bg-mainAccent text-white font-semibold py-3 rounded-lg hover:bg-[#00345a] focus:ring-2 focus:ring-offset-2 focus:ring-[#00457c] transition transform hover:scale-[1.02]"
+                className="w-full bg-[#00345a] text-white font-semibold py-3 rounded-lg hover:bg-[#00345a] focus:ring-2 focus:ring-offset-2 focus:ring-[#00457c] transition transform hover:scale-[1.02]"
               >
                 {buttonText}
               </button>
@@ -115,7 +115,7 @@ function PharmacistDashboard() {
               <p className="text-gray-600 mb-6">{description}</p>
               <button
                 onClick={() => router.push(route)}
-                className="w-full bg-mainAccent text-white font-semibold py-3 rounded-lg hover:bg-[#00345a] focus:ring-2 focus:ring-offset-2 focus:ring-[#00457c] transition transform hover:scale-[1.02]"
+                className="w-full bg-[#00345a] text-white font-semibold py-3 rounded-lg hover:bg-[#00345a] focus:ring-2 focus:ring-offset-2 focus:ring-[#00457c] transition transform hover:scale-[1.02]"
               >
                 {buttonText}
               </button>

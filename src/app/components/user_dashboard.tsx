@@ -68,7 +68,7 @@ function UserDashboard() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-10 bg-mainBg">
+    <div className="h-[100vh] flex flex-col items-center justify-center py-10 bg-mainBg">
       {/* Header */}
       <div className="h-20 w-full bg-[#213555] fixed top-0 left-0 flex justify-between items-center px-6 z-[1000]">
         <h1 className="text-white text-3xl font-extrabold">User Dashboard</h1>
@@ -90,9 +90,9 @@ function UserDashboard() {
       )}
 
       {/* Content below the fixed header */}
-      <div className="flex-grow flex flex-col items-center justify-center w-full px-6 pt-24">
+      <div className="flex-grow flex flex-col items-center justify-center w-full px-6 pt-24 h-[100vh]">
         {/* Grid Layout for Cards (2x2 Matrix) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full mb-[10vh]">
           {cards.map(({ title, description, buttonText, route }) => (
             <div
               key={title}
@@ -102,7 +102,7 @@ function UserDashboard() {
               <p className="text-gray-600 mb-6">{description}</p>
               <button
                 onClick={() => router.push(route)}
-                className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-[#213555] text-white font-semibold py-3 rounded-lg transition"
               >
                 {buttonText}
               </button>

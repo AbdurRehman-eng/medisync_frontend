@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { signOut, User } from "firebase/auth";
@@ -40,43 +40,74 @@ function DoctorDashboard() {
     );
   }
 
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-10 rounded-xl shadow-2xl max-w-lg w-full">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome to the Doctor Dashboard
-        </h1>
-        {user && (
-          <p className="text-center text-lg text-gray-600 mb-8">
-            Signed in as: <span className="font-semibold">{user.email}</span>
-          </p>
-        )}
+  const cards = [
+    {
+      title: "Search Medicine",
+      description: "Find medicine details and information.",
+      buttonText: "Search Now",
+      route: "/pages/search",
+    },
+    {
+      title: "Profile",
+      description: "View and update your doctor profile.",
+      buttonText: "View Profile",
+      route: "/pages/profile",
+    },
+    {
+      title: "Check Appointments",
+      description: "Check upcoming and past appointments.",
+      buttonText: "Check Now",
+      route: "/pages/check_appointment",
+    },
+    {
+      title: "Sign Out",
+      description: "Log out from the dashboard.",
+      buttonText: "Log Out",
+      route: "/pages/login", // Sign-out route
+    },
+  ];
 
-        <div className="space-y-4">
-          <button
-            onClick={() => router.push("/pages/search")}
-            className="w-full px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition"
-          >
-            Search Medicine
-          </button>
-          <button
-            onClick={() => router.push("/pages/profile")}
-            className="w-full px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
-          >
-            Profile
-          </button>
-          <button
-            onClick={() => router.push("/pages/check_appointment")}
-            className="w-full px-6 py-3 bg-teal-600 text-white text-lg font-semibold rounded-lg hover:bg-teal-700 transition"
-          >
-            Check Appointments
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="w-full px-6 py-3 bg-red-600 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition"
-          >
-            Sign Out
-          </button>
+  return (
+    <div className="h-[100vh] flex flex-col items-center py-10 bg-mainBg">
+      {/* Header */}
+      <div className="h-20 w-full bg-[#213555] fixed top-0 left-0 flex justify-between items-center px-6 z-[1000]">
+        <h1 className="text-white text-3xl font-extrabold">Doctor Dashboard</h1>
+
+        {/* Sign-Out Button */}
+        <button
+          onClick={handleSignOut}
+          className="bg-[#ffffff] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a6ed7] transform transition-all duration-300 hover:scale-[1.02] py-2 px-4 rounded-lg font-semibold"
+        >
+          Sign Out
+        </button>
+      </div>
+
+      {/* Welcome Message */}
+      {user && (
+        <p className="text-black text-5xl font-extrabold mt-48 block bg-clip-text text-transparent bg-mainAccent">
+          Welcome, Dr. {user.email}
+        </p>
+      )}
+
+      {/* Content below the fixed header */}
+      <div className="flex-grow flex flex-col items-center justify-center w-full px-6 pt-24">
+        {/* Grid Layout for Cards (2x2 Matrix) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full mb-[10vh]">
+          {cards.map(({ title, description, buttonText, route }) => (
+            <div
+              key={title}
+              className="bg-secAccent p-6 rounded-xl shadow-xl transition transform hover:scale-[1.02]"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-[#00457c]">{title}</h2>
+              <p className="text-gray-600 mb-6">{description}</p>
+              <button
+                onClick={() => router.push(route)}
+                className="w-full bg-[#213555] text-white font-semibold py-3 rounded-lg transition"
+              >
+                {buttonText}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

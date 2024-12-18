@@ -146,7 +146,7 @@ export default function Appointment() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#213555] flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-8">
+    <div className="min-h-screen bg-[#213555] flex items-center justify-center bg-[#213555] p-8">
       <div className="h-20"></div>
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
         <h2 className="text-3xl font-extrabold text-[#001f3d] text-center mb-6">

@@ -116,7 +116,7 @@ const LoginSignup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#173b2b] to-[#2a5c46] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#213555] p-4">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 hover:scale-[1.02]">
         <h2 className="text-3xl font-bold text-center mb-8 text-[#173b2b]">
           {"Login"}
@@ -206,7 +206,7 @@ const LoginSignup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#173b2b] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5c46] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#173b2b] transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#213555] text-white py-3 rounded-lg font-semibold hover:bg-[#1d304d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#173b2b] transform transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <FaSpinner className="animate-spin mx-auto" size={24} />

@@ -9,6 +9,7 @@ function PharmacistDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     // Check if a user is currently signed in
     const currentUser = auth.currentUser;
@@ -39,43 +40,87 @@ function PharmacistDashboard() {
     );
   }
 
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-10 rounded-xl shadow-2xl max-w-lg w-full">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Pharmacist Dashboard
-        </h1>
-        {user && (
-          <p className="text-center text-lg text-gray-600 mb-8">
-            Signed in as: <span className="font-semibold">{user.email}</span>
-          </p>
-        )}
+  const cards = [
+    {
+      title: "Search Medicine",
+      description: "Find medicines in the database quickly and easily.",
+      buttonText: "Search Now",
+      route: "/pages/search",
+    },
+    {
+      title: "Profile",
+      description: "View and edit your personal information.",
+      buttonText: "View Profile",
+      route: "/pages/profile",
+    },
+    {
+      title: "Available Medicines",
+      description: "Check the list of all available medicines.",
+      buttonText: "View Medicines",
+      route: "/pages/available_medicines",
+    },
+  ];
 
-        <div className="space-y-4">
-          <button
-            onClick={() => router.push("/pages/profile")}
-            className="w-full px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition"
-          >
-            Go to Profile
-          </button>
-          <button
-            onClick={() => router.push("/pages/search")}
-            className="w-full px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
-          >
-            Search Medicine
-          </button>
-          <button
-            onClick={() => router.push("/pages/available_medicines")}
-            className="w-full px-6 py-3 bg-purple-600 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition"
-          >
-            Available Medicines
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="w-full px-6 py-3 bg-red-600 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition"
-          >
-            Sign Out
-          </button>
+  return (
+    <div className="min-h-screen flex flex-col items-center py-10 bg-mainBg">
+      {/* Header */}
+      <div className="h-20 w-full bg-[#213555] fixed top-0 left-0 flex justify-between items-center px-6 z-[1000]">
+        <h1 className="text-white text-3xl font-extrabold">Pharmacist Dashboard</h1>
+
+        {/* Sign-Out Button */}
+        <button
+          onClick={handleSignOut}
+          className="bg-[#ffffff] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a6ed7] transform transition-all duration-300 hover:scale-[1.02] py-2 px-4 rounded-lg font-semibold"
+        >
+          Sign Out
+        </button>
+      </div>
+
+      {/* Welcome Message */}
+      {user && (
+        <p className="text-black text-5xl font-extrabold mt-48 block bg-clip-text text-transparent bg-mainAccent">
+          Welcome, {user.email}
+        </p>
+      )}
+
+      {/* Content below the fixed header */}
+      <div className="flex-grow flex flex-col items-center justify-center w-full px-6 pt-24">
+        {/* Grid Layout for Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl w-full">
+          {cards.slice(0, 2).map(({ title, description, buttonText, route }) => (
+            <div
+              key={title}
+              className="bg-secAccent p-6 rounded-xl shadow-xl transition transform hover:scale-[1.02]"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-[#00457c]">{title}</h2>
+              <p className="text-gray-600 mb-6">{description}</p>
+              <button
+                onClick={() => router.push(route)}
+                className="w-full bg-mainAccent text-white font-semibold py-3 rounded-lg hover:bg-[#00345a] focus:ring-2 focus:ring-offset-2 focus:ring-[#00457c] transition transform hover:scale-[1.02]"
+              >
+                {buttonText}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Second Row - Centered Card */}
+        <div className="grid grid-cols-1 justify-items-center w-full mt-8">
+          {cards.slice(2).map(({ title, description, buttonText, route }) => (
+            <div
+              key={title}
+              className="bg-secAccent p-6 rounded-xl shadow-xl transition transform hover:scale-[1.02] w-full max-w-md"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-[#00457c]">{title}</h2>
+              <p className="text-gray-600 mb-6">{description}</p>
+              <button
+                onClick={() => router.push(route)}
+                className="w-full bg-mainAccent text-white font-semibold py-3 rounded-lg hover:bg-[#00345a] focus:ring-2 focus:ring-offset-2 focus:ring-[#00457c] transition transform hover:scale-[1.02]"
+              >
+                {buttonText}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>
